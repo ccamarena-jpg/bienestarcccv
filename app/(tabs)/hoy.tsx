@@ -33,11 +33,13 @@ export default function Hoy() {
         {/* Header */}
         <View style={styles.header}>
           <CText variant="mono" muted style={styles.dateLabel}>{getDayLabel().toUpperCase()}</CText>
-          <View style={styles.avatar}>
-            <CText variant="bodyS" style={{ color: Colors.white, fontFamily: 'InstrumentSans_600SemiBold' }}>
-              {userName.charAt(0)}
-            </CText>
-          </View>
+          <TouchableOpacity onPress={() => router.push('/configuracion')} activeOpacity={0.8}>
+            <View style={styles.avatar}>
+              <CText variant="bodyS" style={{ color: Colors.white, fontFamily: 'InstrumentSans_600SemiBold' }}>
+                {userName.charAt(0)}
+              </CText>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <CText variant="displayL" serif style={styles.greeting}>

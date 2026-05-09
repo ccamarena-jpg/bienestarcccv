@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import * as SheetsService from '../services/sheets';
 
 export type ExpenseCategory = 'Alim.' | 'Salud' | 'Ocio' | 'Trans.' | 'Hogar' | 'Otro';
 
@@ -11,40 +12,39 @@ export interface Expense {
 }
 
 interface AppState {
-  // User
   userName: string;
   setUserName: (name: string) => void;
 
-  // Onboarding
   onboardingDone: boolean;
   setOnboardingDone: (v: boolean) => void;
+
   goals: string[];
   toggleGoal: (goal: string) => void;
 
-  // Budget
   budget: number;
   setBudget: (n: number) => void;
 
-  // Expenses
   expenses: Expense[];
   addExpense: (e: Omit<Expense, 'id'>) => void;
   clearExpenses: () => void;
-
-  // Derived
   spent: number;
 
-  // Workout
   workoutDone: boolean;
   toggleWorkout: () => void;
 
-  // Outfit
   outfitImg: string | null;
   setOutfitImg: (url: string | null) => void;
+
+  sheetsConnected: boolean;
+  setSheetsConnected: (v: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
   userName: 'Claudia',
-  setUserName: (name) => set({ userName: name }),
+  setUserName: (name) => {
+    set({ userName: name });
+    SheetsService.setConfig('nombre', name).catch(() => {});
+  },
 
   onboardingDone: false,
   setOnboardingDone: (v) => set({ onboardingDone: v }),
@@ -60,23 +60,30 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   budget: 80,
-  setBudget: (n) => set({ budget: n }),
+  setBudget: (n) => {
+    set({ budget: n });
+    SheetsService.setConfig('presupuesto', String(n)).catch(() => {});
+  },
 
   expenses: [],
   addExpense: (e) => {
     const newExpense: Expense = { ...e, id: Date.now().toString() };
-    set((s) => ({
-      expenses: [newExpense, ...s.expenses],
-      spent: s.spent + e.amt,
-    }));
+    set((s) => ({ expenses: [newExpense, ...s.expenses], spent: s.spent + e.amt }));
+    SheetsService.addGasto(e).catch(() => {});
   },
   clearExpenses: () => set({ expenses: [], spent: 0 }),
-
   spent: 0,
 
   workoutDone: false,
-  toggleWorkout: () => set((s) => ({ workoutDone: !s.workoutDone })),
+  toggleWorkout: () => {
+    const next = !get().workoutDone;
+    set({ workoutDone: next });
+    SheetsService.setWorkout(next).catch(() => {});
+  },
 
   outfitImg: null,
   setOutfitImg: (url) => set({ outfitImg: url }),
+
+  sheetsConnected: false,
+  setSheetsConnected: (v) => set({ sheetsConnected: v }),
 }));

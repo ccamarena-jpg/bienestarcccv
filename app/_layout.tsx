@@ -40,6 +40,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding/metas" />
         <Stack.Screen name="onboarding/sobre" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="configuracion" options={{ presentation: 'modal' }} />
       </Stack>
     </GestureHandlerRootView>
   );
