@@ -11,6 +11,7 @@ import {
   type Receta,
   type Categoria,
 } from '../../data/recetas';
+import { useAppStore } from '../../store/useAppStore';
 
 const CATEGORIAS: { id: Categoria; label: string; icon: string }[] = [
   { id: 'desayuno', label: 'Desayuno', icon: '◐' },
@@ -21,22 +22,14 @@ const CATEGORIAS: { id: Categoria; label: string; icon: string }[] = [
 
 export default function Cocina() {
   const [catActiva, setCatActiva] = useState<Categoria>('desayuno');
-  const [seleccionadas, setSeleccionadas] = useState<Record<Categoria, string | null>>({
-    desayuno: null,
-    almuerzo: null,
-    cena: null,
-    snack: null,
-  });
+  const { selectedRecipes, selectRecipe } = useAppStore();
 
   const recetaDelDia = getRecetaDelDia(catActiva);
   const opciones = getRecetasPorCategoria(catActiva);
-  const selActual = seleccionadas[catActiva];
+  const selActual = selectedRecipes[catActiva] ?? null;
 
   const toggleSeleccion = (receta: Receta) => {
-    setSeleccionadas((prev) => ({
-      ...prev,
-      [catActiva]: prev[catActiva] === receta.id ? null : receta.id,
-    }));
+    selectRecipe(catActiva, selActual === receta.id ? null : receta.id);
   };
 
   return (
@@ -46,10 +39,10 @@ export default function Cocina() {
         <CHairline style={styles.rule} />
 
         {/* Resumen de lo seleccionado */}
-        {Object.entries(seleccionadas).some(([, v]) => v !== null) && (
+        {Object.entries(selectedRecipes).some(([, v]) => v !== null) && (
           <CCard style={styles.resumenCard}>
             <CText variant="mono" muted style={styles.resumenTitle}>MI PLAN HOY</CText>
-            {(Object.entries(seleccionadas) as [Categoria, string | null][]).map(([cat, id]) => {
+            {(Object.entries(selectedRecipes) as [Categoria, string | null][]).map(([cat, id]) => {
               if (!id) return null;
               const r = getRecetasPorCategoria(cat).find((x) => x.id === id);
               if (!r) return null;
@@ -68,7 +61,7 @@ export default function Cocina() {
         {/* Selector de categoría */}
         <View style={styles.catSelector}>
           {CATEGORIAS.map((cat) => {
-            const tieneSeleccion = !!seleccionadas[cat.id];
+            const tieneSeleccion = !!selectedRecipes[cat.id];
             return (
               <TouchableOpacity
                 key={cat.id}

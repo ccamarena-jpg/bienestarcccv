@@ -37,6 +37,9 @@ interface AppState {
 
   sheetsConnected: boolean;
   setSheetsConnected: (v: boolean) => void;
+
+  selectedRecipes: Record<string, string | null>;
+  selectRecipe: (categoria: string, recetaId: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -86,4 +89,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   sheetsConnected: false,
   setSheetsConnected: (v) => set({ sheetsConnected: v }),
+
+  selectedRecipes: { desayuno: null, almuerzo: null, cena: null, snack: null },
+  selectRecipe: (categoria, recetaId) =>
+    set((s) => ({ selectedRecipes: { ...s.selectedRecipes, [categoria]: recetaId } })),
 }));
