@@ -1,16 +1,18 @@
 import React from 'react';
 import { View, ViewProps, StyleSheet } from 'react-native';
-import { Colors, Spacing, Radius } from '../../constants/tokens';
+import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
 
 interface CCardProps extends ViewProps {
   noPadding?: boolean;
+  color?: string;
 }
 
-export function CCard({ style, noPadding = false, ...props }: CCardProps) {
+export function CCard({ style, noPadding = false, color, ...props }: CCardProps) {
   return (
     <View
       style={[
         styles.card,
+        { backgroundColor: color ?? Colors.white },
         noPadding && { padding: 0 },
         style,
       ]}
@@ -21,10 +23,8 @@ export function CCard({ style, noPadding = false, ...props }: CCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.white,
     borderRadius: Radius.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
     padding: Spacing.md,
+    ...Shadow.card,
   },
 });

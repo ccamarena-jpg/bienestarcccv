@@ -26,7 +26,7 @@ export default function RootLayout() {
 
   if (!serifLoaded || !sansLoaded || !monoLoaded) {
     return (
-      <View style={{ flex: 1, backgroundColor: Colors.paper, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color={Colors.accent} />
       </View>
     );
@@ -34,8 +34,8 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="dark" backgroundColor={Colors.paper} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.paper } }}>
+      <StatusBar style="dark" backgroundColor={Colors.bg} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.bg } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding/metas" />
         <Stack.Screen name="onboarding/sobre" />

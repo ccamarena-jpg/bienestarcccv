@@ -1,21 +1,21 @@
 import { Tabs } from 'expo-router';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { Colors, Spacing } from '../../constants/tokens';
+import { Colors, Radius } from '../../constants/tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const NAV_ITEMS = [
-  { name: 'hoy', label: 'Hoy', icon: '◐' },
-  { name: 'cocina', label: 'Cocina', icon: '◍' },
-  { name: 'gastos', label: 'S/', icon: '◎' },
-  { name: 'estilo', label: 'Estilo', icon: '◑' },
-  { name: 'agenda', label: 'Cuerpo', icon: '◒' },
+  { name: 'hoy',    icon: '⌂', label: 'Hoy' },
+  { name: 'cocina', icon: '◍', label: 'Cocina' },
+  { name: 'gastos', icon: 'S/', label: 'Gastos' },
+  { name: 'estilo', icon: '◑', label: 'Estilo' },
+  { name: 'agenda', icon: '◒', label: 'Agenda' },
 ];
 
-function CNav({ state, descriptors, navigation }: any) {
+function CNav({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.nav, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-      <View style={styles.navInner}>
+    <View style={[styles.nav, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+      <View style={styles.pill}>
         {state.routes.map((route: any, index: number) => {
           const isFocused = state.index === index;
           const item = NAV_ITEMS.find((n) => n.name === route.name) || NAV_ITEMS[0];
@@ -23,14 +23,11 @@ function CNav({ state, descriptors, navigation }: any) {
             <TouchableOpacity
               key={route.key}
               onPress={() => navigation.navigate(route.name)}
-              style={styles.navItem}
+              style={[styles.navItem, isFocused && styles.navItemActive]}
               activeOpacity={0.7}
             >
               <Text style={[styles.navIcon, isFocused && styles.navIconActive]}>
                 {item.icon}
-              </Text>
-              <Text style={[styles.navLabel, isFocused && styles.navLabelActive]}>
-                {item.label}
               </Text>
             </TouchableOpacity>
           );
@@ -54,35 +51,32 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   nav: {
-    backgroundColor: Colors.paper,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: Colors.rule,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    paddingTop: 10,
   },
-  navInner: {
+  pill: {
     flexDirection: 'row',
-    paddingTop: 8,
-    paddingHorizontal: Spacing.sm,
+    backgroundColor: Colors.ink,
+    borderRadius: Radius.pill,
+    padding: 5,
+    gap: 4,
   },
   navItem: {
-    flex: 1,
+    width: 48,
+    height: 40,
+    borderRadius: Radius.pill,
     alignItems: 'center',
-    paddingVertical: 6,
-    gap: 3,
+    justifyContent: 'center',
+  },
+  navItemActive: {
+    backgroundColor: Colors.white,
   },
   navIcon: {
     fontSize: 16,
-    color: Colors.muted,
+    color: 'rgba(255,255,255,0.5)',
   },
   navIconActive: {
-    color: Colors.ink,
-  },
-  navLabel: {
-    fontSize: 10,
-    fontFamily: 'JetBrainsMono_400Regular',
-    color: Colors.muted,
-    letterSpacing: 0.5,
-  },
-  navLabelActive: {
     color: Colors.ink,
   },
 });
