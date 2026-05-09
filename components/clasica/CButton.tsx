@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   ghost:   { backgroundColor: 'transparent' },
   label: {
     fontSize: 14,
-    fontFamily: 'InstrumentSans_600SemiBold',
+    fontFamily: 'Outfit_600SemiBold',
     letterSpacing: 0.3,
   },
 });

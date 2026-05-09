@@ -1,24 +1,21 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, PanResponder, Dimensions } from 'react-native';
+import { View, ScrollView, StyleSheet, PanResponder, Dimensions, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CText } from '../../components/clasica/CText';
-import { CButton } from '../../components/clasica/CButton';
-import { CHairline } from '../../components/clasica/CHairline';
-import { CProgressBar } from '../../components/clasica/CProgressBar';
-import { Colors, Spacing } from '../../constants/tokens';
+import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
 import { useAppStore } from '../../store/useAppStore';
 
 const MIN_BUDGET = 30;
 const MAX_BUDGET = 500;
-const SCREEN_W = Dimensions.get('window').width - Spacing.md * 2;
+const SCREEN_W = Dimensions.get('window').width - Spacing.md * 2 - Spacing.md * 2;
 
-const CATEGORIES: { label: string; pct: number }[] = [
-  { label: 'Alimentación', pct: 0.45 },
-  { label: 'Transporte', pct: 0.15 },
-  { label: 'Salud', pct: 0.20 },
-  { label: 'Ocio', pct: 0.12 },
-  { label: 'Otros', pct: 0.08 },
+const CATEGORIES = [
+  { label: 'Alimentación', pct: 0.45, color: Colors.mint,    dk: Colors.mintDk },
+  { label: 'Transporte',   pct: 0.15, color: Colors.sky,     dk: Colors.skyDk },
+  { label: 'Salud',        pct: 0.20, color: Colors.lavender, dk: Colors.lavenderDk },
+  { label: 'Ocio',         pct: 0.12, color: Colors.yellow,  dk: Colors.yellowDk },
+  { label: 'Otros',        pct: 0.08, color: Colors.coral,   dk: Colors.coralDk },
 ];
 
 export default function Sobre() {
@@ -31,7 +28,7 @@ export default function Sobre() {
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
     onPanResponderMove: (_, gs) => {
-      const newX = Math.max(0, Math.min(SCREEN_W, gs.moveX - Spacing.md));
+      const newX = Math.max(0, Math.min(SCREEN_W, gs.moveX - Spacing.md * 2));
       setSliderX(newX);
       const newBudget = Math.round(MIN_BUDGET + (newX / SCREEN_W) * (MAX_BUDGET - MIN_BUDGET));
       setBudget(newBudget);
@@ -43,138 +40,168 @@ export default function Sobre() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <CText variant="mono" muted style={styles.eyebrow}>
-          BITÁCORA · ONBOARDING 3 / 3
-        </CText>
-        <CHairline style={styles.rule} />
 
-        <CText variant="displayM" serif style={styles.title}>
-          El sobre diario
-        </CText>
-        <CText variant="bodyM" muted style={styles.subtitle}>
-          ¿Cuánto quieres gastar por día? Puedes ajustarlo después.
-        </CText>
-
-        {/* Budget display */}
-        <View style={styles.budgetDisplay}>
-          <CText variant="displayXL" serif accent style={styles.budgetNumber}>
-            S/{budget}
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.stepBadge}>
+            <CText variant="label" style={{ color: Colors.mintDk, letterSpacing: 1 }}>PASO 3 DE 3</CText>
+          </View>
+          <CText variant="title" weight="bold" style={styles.headline}>
+            El sobre diario
           </CText>
-          <CText variant="bodyS" muted>
-            por día
-          </CText>
+          <CText variant="body" muted>¿Cuánto quieres gastar por día? Lo puedes cambiar después.</CText>
         </View>
 
-        {/* Slider */}
-        <View style={styles.sliderContainer}>
-          <View style={styles.sliderTrack}>
-            <View style={[styles.sliderFill, { width: sliderX }]} />
-            <View
-              style={[styles.sliderThumb, { left: sliderX - 12 }]}
-              {...panResponder.panHandlers}
-            />
-          </View>
-          <View style={styles.sliderLabels}>
-            <CText variant="mono" muted>S/{MIN_BUDGET}</CText>
-            <CText variant="mono" muted>S/{MAX_BUDGET}</CText>
+        {/* Budget card */}
+        <View style={styles.budgetCard}>
+          <CText variant="label" muted style={{ letterSpacing: 1.2 }}>PRESUPUESTO DIARIO</CText>
+          <CText style={styles.budgetNum}>S/{budget}</CText>
+          <CText variant="bodyS" muted>soles por día</CText>
+
+          {/* Slider */}
+          <View style={styles.sliderWrapper}>
+            <View style={styles.sliderTrack}>
+              <View style={[styles.sliderFill, { width: sliderX }]} />
+              <View
+                style={[styles.sliderThumb, { left: sliderX - 14 }]}
+                {...panResponder.panHandlers}
+              />
+            </View>
+            <View style={styles.sliderLabels}>
+              <CText variant="label" muted>S/{MIN_BUDGET}</CText>
+              <CText variant="label" muted>S/{MAX_BUDGET}</CText>
+            </View>
           </View>
         </View>
 
-        {/* Category breakdown */}
-        <View style={styles.breakdown}>
-          <CText variant="mono" muted style={styles.breakdownTitle}>
-            REPARTO SUGERIDO
-          </CText>
+        {/* Breakdown */}
+        <View style={styles.breakdownCard}>
+          <CText variant="label" muted style={{ letterSpacing: 1.2, marginBottom: Spacing.sm }}>REPARTO SUGERIDO</CText>
           {CATEGORIES.map((cat) => {
             const amt = Math.round(budget * cat.pct);
+            const barW = cat.pct * (Dimensions.get('window').width - Spacing.md * 2 - Spacing.md * 2 - 100);
             return (
               <View key={cat.label} style={styles.catRow}>
                 <CText variant="bodyS" style={styles.catLabel}>{cat.label}</CText>
-                <CProgressBar progress={cat.pct} />
-                <CText variant="mono" muted style={styles.catAmt}>S/{amt}</CText>
+                <View style={styles.catBarBg}>
+                  <View style={[styles.catBarFill, { width: barW * cat.pct * 4, backgroundColor: cat.dk }]} />
+                </View>
+                <CText variant="label" weight="semi" style={{ color: cat.dk, width: 44, textAlign: 'right' }}>
+                  S/{amt}
+                </CText>
               </View>
             );
           })}
         </View>
 
-        <View style={styles.bottom}>
-          <CHairline />
-          <View style={styles.nav}>
-            <CButton label="Atrás" variant="ghost" onPress={() => router.back()} />
-            <CButton
-              label="Empezar →"
-              onPress={() => {
-                setOnboardingDone(true);
-                router.replace('/(tabs)/hoy');
-              }}
-              style={styles.cta}
-            />
-          </View>
+        {/* Nav */}
+        <View style={styles.navRow}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+            <CText variant="subtitle" weight="semi" style={{ color: Colors.ink }}>← Atrás</CText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cta}
+            onPress={() => { setOnboardingDone(true); router.replace('/(tabs)/hoy'); }}
+            activeOpacity={0.85}
+          >
+            <CText variant="subtitle" weight="semi" style={{ color: Colors.white }}>Empezar →</CText>
+          </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.paper },
-  container: { flexGrow: 1, paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: Spacing.xl },
-  eyebrow: { letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: Spacing.sm },
-  rule: { marginBottom: Spacing.xl },
-  title: { marginBottom: Spacing.xs },
-  subtitle: { marginBottom: Spacing.lg },
-  budgetDisplay: { alignItems: 'center', marginBottom: Spacing.lg },
-  budgetNumber: { lineHeight: 100 },
-  sliderContainer: { marginBottom: Spacing.lg },
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  container: { flexGrow: 1, paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: Spacing.xl, gap: Spacing.md },
+  header: { gap: Spacing.xs },
+  stepBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.mint,
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 5,
+    marginBottom: Spacing.xs,
+  },
+  headline: { fontSize: 32, lineHeight: 38, color: Colors.ink },
+
+  budgetCard: {
+    backgroundColor: Colors.lavender,
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    alignItems: 'center',
+    gap: Spacing.xs,
+    ...Shadow.card,
+  },
+  budgetNum: {
+    fontSize: 64,
+    fontFamily: 'Outfit_800ExtraBold',
+    color: Colors.ink,
+    lineHeight: 72,
+  },
+  sliderWrapper: { width: '100%', marginTop: Spacing.sm },
   sliderTrack: {
-    height: 2,
-    backgroundColor: Colors.rule,
-    borderRadius: 1,
+    height: 6,
+    backgroundColor: 'rgba(26,26,46,0.12)',
+    borderRadius: 3,
     position: 'relative',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
-  sliderFill: {
-    height: 2,
-    backgroundColor: Colors.accent,
-    borderRadius: 1,
-  },
+  sliderFill: { height: 6, backgroundColor: Colors.lavenderDk, borderRadius: 3 },
   sliderThumb: {
     position: 'absolute',
     top: -11,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.accent,
+    borderWidth: 3,
+    borderColor: Colors.lavenderDk,
     shadowColor: Colors.ink,
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: Spacing.xs,
+  sliderLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: Spacing.xs },
+
+  breakdownCard: {
+    backgroundColor: Colors.white,
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+    ...Shadow.card,
   },
-  breakdown: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
+  catRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingVertical: 3 },
+  catLabel: { width: 90, color: Colors.ink },
+  catBarBg: {
+    flex: 1,
+    height: 8,
+    backgroundColor: Colors.bg,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
-  breakdownTitle: {
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    marginBottom: Spacing.xs,
-  },
-  catRow: {
-    flexDirection: 'row',
+  catBarFill: { height: 8, borderRadius: 4 },
+
+  navRow: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },
+  backBtn: {
+    flex: 1,
+    height: 52,
+    borderRadius: Radius.btn,
     alignItems: 'center',
-    gap: Spacing.sm,
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    ...Shadow.card,
   },
-  catLabel: { width: 100 },
-  catAmt: { width: 40, textAlign: 'right' },
-  bottom: { gap: Spacing.md },
-  nav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cta: { flex: 1, marginLeft: Spacing.sm },
+  cta: {
+    flex: 2,
+    backgroundColor: Colors.ink,
+    borderRadius: Radius.btn,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadow.card,
+  },
 });

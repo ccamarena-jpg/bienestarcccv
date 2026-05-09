@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -12,20 +12,17 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CText } from '../../components/clasica/CText';
-import { CCard } from '../../components/clasica/CCard';
-import { CHairline } from '../../components/clasica/CHairline';
-import { CProgressBar } from '../../components/clasica/CProgressBar';
-import { Colors, Spacing } from '../../constants/tokens';
+import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
 import { useAppStore, ExpenseCategory } from '../../store/useAppStore';
 
 const CATS: ExpenseCategory[] = ['Alim.', 'Salud', 'Ocio', 'Trans.', 'Hogar', 'Otro'];
-const CAT_ICONS: Record<ExpenseCategory, string> = {
-  'Alim.': '◐',
-  'Salud': '◍',
-  'Ocio': '◎',
-  'Trans.': '◑',
-  'Hogar': '◒',
-  'Otro': '◓',
+const CAT_META: Record<ExpenseCategory, { icon: string; color: string; dk: string }> = {
+  'Alim.': { icon: '🥗', color: Colors.mint,     dk: Colors.mintDk },
+  'Salud': { icon: '💊', color: Colors.sky,       dk: Colors.skyDk },
+  'Ocio':  { icon: '🎯', color: Colors.yellow,    dk: Colors.yellowDk },
+  'Trans.':{ icon: '🚌', color: Colors.lavender,  dk: Colors.lavenderDk },
+  'Hogar': { icon: '🏠', color: Colors.coral,     dk: Colors.coralDk },
+  'Otro':  { icon: '📦', color: Colors.lime,      dk: Colors.limeDk },
 };
 
 function buildMonthGrid() {
@@ -52,43 +49,46 @@ function Heatmap({ expenses }: { expenses: { ts: number; amt: number }[] }) {
   });
 
   const maxSpend = Math.max(...Object.values(spendByDay), 1);
-  const CELL_SIZE = Math.floor((Dimensions.get('window').width - Spacing.md * 2 - 16) / 7);
+  const CELL_SIZE = Math.floor((Dimensions.get('window').width - Spacing.md * 2 - Spacing.md * 2 - 12) / 7);
 
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <View>
-      <View style={styles.heatDayLabels}>
+    <View style={heatStyles.wrap}>
+      <View style={heatStyles.dayRow}>
         {DAY_LABELS.map((l) => (
-          <View key={l} style={[styles.heatCell, { width: CELL_SIZE, height: 20 }]}>
-            <CText variant="mono" muted style={{ fontSize: 9, textAlign: 'center' }}>{l}</CText>
+          <View key={l} style={[heatStyles.cell, { width: CELL_SIZE, height: 20 }]}>
+            <CText variant="label" muted style={{ fontSize: 9, textAlign: 'center' }}>{l}</CText>
           </View>
         ))}
       </View>
-      <View style={styles.heatGrid}>
+      <View style={heatStyles.grid}>
         {cells.map((day, i) => {
-          if (day === null) return <View key={`e-${i}`} style={[styles.heatCell, { width: CELL_SIZE, height: CELL_SIZE }]} />;
+          if (day === null) return <View key={`e-${i}`} style={[heatStyles.cell, { width: CELL_SIZE, height: CELL_SIZE }]} />;
           const spend = spendByDay[day] || 0;
-          const intensity = spend > 0 ? 0.15 + (spend / maxSpend) * 0.75 : 0;
+          const intensity = spend > 0 ? 0.2 + (spend / maxSpend) * 0.75 : 0;
           const isToday = day === today;
+          const bg = spend > 0
+            ? `rgba(93,191,163,${intensity})`
+            : Colors.white;
           return (
             <View
               key={day}
               style={[
-                styles.heatCell,
+                heatStyles.cell,
                 {
                   width: CELL_SIZE,
                   height: CELL_SIZE,
-                  backgroundColor: spend > 0 ? `rgba(184,89,58,${intensity})` : Colors.surface,
-                  borderWidth: isToday ? 1 : 0,
-                  borderColor: Colors.accent,
-                  borderRadius: 2,
+                  backgroundColor: bg,
+                  borderRadius: 8,
+                  borderWidth: isToday ? 2 : 0,
+                  borderColor: Colors.mintDk,
                 },
               ]}
             >
-              <CText variant="mono" style={{ fontSize: 9, textAlign: 'center', color: isToday ? Colors.accent : Colors.muted }}>
+              <CText style={{ fontSize: 9, textAlign: 'center', color: isToday ? Colors.mintDk : Colors.muted }}>
                 {day}
               </CText>
             </View>
@@ -98,6 +98,13 @@ function Heatmap({ expenses }: { expenses: { ts: number; amt: number }[] }) {
     </View>
   );
 }
+
+const heatStyles = StyleSheet.create({
+  wrap: { gap: 4 },
+  dayRow: { flexDirection: 'row' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
+  cell: { alignItems: 'center', justifyContent: 'center', margin: 1 },
+});
 
 function QuickAddModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { addExpense } = useAppStore();
@@ -119,59 +126,55 @@ function QuickAddModal({ visible, onClose }: { visible: boolean; onClose: () => 
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.modalKAV}
-      >
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + Spacing.md }]}>
-          <View style={styles.sheetHandle} />
-          <CText variant="mono" muted style={styles.sheetTitle}>AGREGAR GASTO</CText>
-          <CHairline style={{ marginBottom: Spacing.md }} />
+      <TouchableOpacity style={modalStyles.overlay} activeOpacity={1} onPress={onClose} />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={modalStyles.kav}>
+        <View style={[modalStyles.sheet, { paddingBottom: insets.bottom + Spacing.md }]}>
+          <View style={modalStyles.handle} />
+          <CText variant="subtitle" weight="bold" style={{ marginBottom: Spacing.sm }}>Agregar gasto</CText>
 
-          <CText variant="bodyS" muted style={styles.fieldLabel}>MONTO</CText>
-          <View style={styles.amountRow}>
-            <CText variant="displayM" serif accent>S/</CText>
+          <CText variant="label" muted style={{ letterSpacing: 1, marginBottom: 4 }}>MONTO</CText>
+          <View style={modalStyles.amountRow}>
+            <CText style={{ fontSize: 28, fontFamily: 'Outfit_700Bold', color: Colors.mintDk }}>S/</CText>
             <TextInput
               value={amount}
               onChangeText={setAmount}
               keyboardType="decimal-pad"
               placeholder="0"
               placeholderTextColor={Colors.muted}
-              style={styles.amountInput}
+              style={modalStyles.amountInput}
               autoFocus
             />
           </View>
 
-          <CText variant="bodyS" muted style={styles.fieldLabel}>NOTA (opcional)</CText>
+          <CText variant="label" muted style={{ letterSpacing: 1, marginBottom: 4, marginTop: Spacing.sm }}>NOTA (opcional)</CText>
           <TextInput
             value={note}
             onChangeText={setNote}
             placeholder="ej. almuerzo, taxi, café..."
             placeholderTextColor={Colors.muted}
-            style={styles.noteInput}
+            style={modalStyles.noteInput}
           />
 
-          <CText variant="bodyS" muted style={styles.fieldLabel}>CATEGORÍA</CText>
-          <View style={styles.catChips}>
-            {CATS.map((c) => (
-              <TouchableOpacity
-                key={c}
-                onPress={() => setCat(c)}
-                style={[styles.catChip, cat === c && styles.catChipActive]}
-                activeOpacity={0.7}
-              >
-                <CText variant="bodyS" style={cat === c ? { color: Colors.white } : {}}>
-                  {CAT_ICONS[c]} {c}
-                </CText>
-              </TouchableOpacity>
-            ))}
+          <CText variant="label" muted style={{ letterSpacing: 1, marginBottom: Spacing.xs, marginTop: Spacing.sm }}>CATEGORÍA</CText>
+          <View style={modalStyles.catGrid}>
+            {CATS.map((c) => {
+              const meta = CAT_META[c];
+              return (
+                <TouchableOpacity
+                  key={c}
+                  onPress={() => setCat(c)}
+                  style={[modalStyles.catChip, { backgroundColor: cat === c ? meta.dk : meta.color }]}
+                  activeOpacity={0.8}
+                >
+                  <CText style={{ fontSize: 16 }}>{meta.icon}</CText>
+                  <CText variant="label" style={{ color: cat === c ? Colors.white : Colors.ink }}>{c}</CText>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
-          <TouchableOpacity style={styles.addBtn} onPress={handleAdd} activeOpacity={0.8}>
-            <CText variant="bodyM" style={{ color: Colors.white, letterSpacing: 0.5 }}>
-              Registrar
-            </CText>
+          <TouchableOpacity style={modalStyles.addBtn} onPress={handleAdd} activeOpacity={0.85}>
+            <CText variant="subtitle" weight="semi" style={{ color: Colors.white }}>Registrar</CText>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -179,12 +182,58 @@ function QuickAddModal({ visible, onClose }: { visible: boolean; onClose: () => 
   );
 }
 
-function ConversationalView({ onOpenAdd }: { onOpenAdd: () => void }) {
-  const { expenses, budget, spent } = useAppStore();
+const modalStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)' },
+  kav: { justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: Colors.bg,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+  },
+  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.rule, alignSelf: 'center', marginBottom: Spacing.sm },
+  amountRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  amountInput: {
+    flex: 1,
+    fontSize: 36,
+    fontFamily: 'Outfit_700Bold',
+    color: Colors.ink,
+    paddingVertical: 4,
+  },
+  noteInput: {
+    height: 44,
+    borderRadius: Radius.cardSm,
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.sm,
+    fontFamily: 'Outfit_400Regular',
+    fontSize: 14,
+    color: Colors.ink,
+  },
+  catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
+  catChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 8,
+    borderRadius: Radius.pill,
+  },
+  addBtn: {
+    height: 52,
+    backgroundColor: Colors.ink,
+    borderRadius: Radius.btn,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.sm,
+  },
+});
+
+function ConversationalView() {
+  const { expenses, budget, spent, addExpense } = useAppStore();
   const [input, setInput] = useState('');
-  const { addExpense } = useAppStore();
   const [messages, setMessages] = useState<{ role: 'user' | 'manager'; text: string }[]>([
-    { role: 'manager', text: `Hola, Claudia. Llevas S/${spent} de S/${budget} hoy. ¿Qué compraste?` },
+    { role: 'manager', text: `Hola, Claudia 👋 Llevas S/${spent} de S/${budget} hoy. ¿Qué compraste?` },
   ]);
 
   const parseAndAdd = (text: string) => {
@@ -196,11 +245,7 @@ function ConversationalView({ onOpenAdd }: { onOpenAdd: () => void }) {
     else if (/farma|medicina|doctor|salud/i.test(text)) cat = 'Salud';
     else if (/cine|juego|entretenimiento/i.test(text)) cat = 'Ocio';
     else if (/mercado|limpieza|hogar/i.test(text)) cat = 'Hogar';
-
-    if (amt) {
-      addExpense({ cat, amt, note: text, ts: Date.now() });
-      return { amt, cat };
-    }
+    if (amt) { addExpense({ cat, amt, note: text, ts: Date.now() }); return { amt, cat }; }
     return null;
   };
 
@@ -215,131 +260,162 @@ function ConversationalView({ onOpenAdd }: { onOpenAdd: () => void }) {
       const remaining = bud - newSpent;
       newMessages.push({
         role: 'manager',
-        text: `Registré S/${parsed.amt} en ${parsed.cat}. ${remaining >= 0 ? `Te quedan S/${remaining.toFixed(0)} del sobre.` : `Excediste el sobre por S/${Math.abs(remaining).toFixed(0)}.`}`,
+        text: `Registré S/${parsed.amt} en ${parsed.cat}. ${remaining >= 0 ? `Te quedan S/${remaining.toFixed(0)} 💚` : `Superaste el sobre por S/${Math.abs(remaining).toFixed(0)} 🔴`}`,
       });
     } else {
-      newMessages.push({
-        role: 'manager',
-        text: 'No entendí el monto. Escribe algo como "gasté 15 en almuerzo".',
-      });
+      newMessages.push({ role: 'manager', text: 'No entendí el monto. Escribe "gasté 15 en almuerzo".' });
     }
     setMessages(newMessages);
   };
 
   return (
-    <View style={styles.chatContainer}>
-      <CText variant="mono" muted style={styles.chatTitle}>MODO CONVERSACIONAL</CText>
-      <ScrollView style={styles.chatMessages} showsVerticalScrollIndicator={false}>
+    <View style={chatStyles.wrap}>
+      <ScrollView style={chatStyles.messages} showsVerticalScrollIndicator={false}>
         {messages.map((m, i) => (
-          <View key={i} style={[styles.bubble, m.role === 'user' ? styles.bubbleUser : styles.bubbleManager]}>
-            {m.role === 'manager' && (
-              <CText variant="mono" accent style={styles.bubbleLabel}>MANAGER</CText>
-            )}
-            <CText variant="bodyM" italic={m.role === 'manager'} serif={m.role === 'manager'} style={styles.bubbleText}>
+          <View key={i} style={[chatStyles.bubble, m.role === 'user' ? chatStyles.bubbleUser : chatStyles.bubbleManager]}>
+            <CText variant="body" style={{ color: m.role === 'user' ? Colors.ink : Colors.ink, lineHeight: 22 }}>
               {m.text}
             </CText>
           </View>
         ))}
       </ScrollView>
-      <View style={styles.chatInput}>
+      <View style={chatStyles.inputRow}>
         <TextInput
           value={input}
           onChangeText={setInput}
-          placeholder='ej. "gasté 12 en almuerzo"'
+          placeholder='"gasté 12 en almuerzo"'
           placeholderTextColor={Colors.muted}
-          style={styles.chatTextInput}
+          style={chatStyles.textInput}
           onSubmitEditing={send}
           returnKeyType="send"
         />
-        <TouchableOpacity onPress={send} style={styles.sendBtn} activeOpacity={0.7}>
-          <CText variant="mono" style={{ color: Colors.white }}>→</CText>
+        <TouchableOpacity onPress={send} style={chatStyles.sendBtn} activeOpacity={0.8}>
+          <CText style={{ color: Colors.white, fontSize: 18 }}>→</CText>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
+const chatStyles = StyleSheet.create({
+  wrap: { gap: Spacing.sm },
+  messages: { maxHeight: 260 },
+  bubble: { padding: Spacing.sm, marginBottom: Spacing.xs, borderRadius: Radius.cardSm },
+  bubbleManager: { backgroundColor: Colors.mint },
+  bubbleUser: { backgroundColor: Colors.white, alignSelf: 'flex-end', maxWidth: '80%', ...Shadow.card },
+  inputRow: { flexDirection: 'row', gap: Spacing.xs },
+  textInput: {
+    flex: 1,
+    height: 44,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: Radius.pill,
+    fontFamily: 'Outfit_400Regular',
+    fontSize: 14,
+    color: Colors.ink,
+    backgroundColor: Colors.white,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    backgroundColor: Colors.ink,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
 export default function Gastos() {
   const { budget, spent, expenses } = useAppStore();
   const [showAdd, setShowAdd] = useState(false);
   const [view, setView] = useState<'heatmap' | 'chat'>('heatmap');
   const overBudget = spent > budget;
-  const progress = budget > 0 ? spent / budget : 0;
+  const progress = budget > 0 ? Math.min(spent / budget, 1) : 0;
 
   const catTotals: Record<string, number> = {};
-  expenses.forEach((e) => {
-    catTotals[e.cat] = (catTotals[e.cat] || 0) + e.amt;
-  });
+  expenses.forEach((e) => { catTotals[e.cat] = (catTotals[e.cat] || 0) + e.amt; });
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <CText variant="mono" muted style={styles.eyebrow}>EL SOBRE · HOY</CText>
-        <CHairline style={styles.rule} />
 
-        {/* Big number */}
-        <View style={styles.totalRow}>
-          <CText variant="displayXL" serif accent style={styles.totalNum}>
-            S/{spent}
-          </CText>
+        {/* Header */}
+        <View style={styles.header}>
+          <CText variant="title" weight="bold" style={{ fontSize: 28, color: Colors.ink }}>El Sobre</CText>
+          <CText variant="body" muted>Gastos de hoy</CText>
         </View>
-        <CText variant="bodyM" muted style={styles.budgetLabel}>
-          de S/{budget} · {Math.round(progress * 100)}%
-        </CText>
-        <CProgressBar progress={progress} overBudget={overBudget} />
 
-        {/* Category bars */}
+        {/* Hero card */}
+        <View style={[styles.heroCard, { backgroundColor: overBudget ? Colors.coral : Colors.mint }]}>
+          <CText variant="label" style={{ color: overBudget ? Colors.coralDk : Colors.mintDk, letterSpacing: 1 }}>
+            {overBudget ? 'SOBRE EXCEDIDO' : 'SOBRE DEL DÍA'}
+          </CText>
+          <CText style={styles.heroNum}>S/{spent}</CText>
+          <CText variant="body" style={{ color: Colors.ink, opacity: 0.7 }}>de S/{budget} · {Math.round(progress * 100)}%</CText>
+
+          {/* Progress bar */}
+          <View style={styles.progressBg}>
+            <View style={[
+              styles.progressFill,
+              {
+                width: `${Math.min(progress * 100, 100)}%`,
+                backgroundColor: overBudget ? Colors.coralDk : Colors.mintDk,
+              },
+            ]} />
+          </View>
+        </View>
+
+        {/* Category list */}
         {Object.keys(catTotals).length > 0 && (
-          <View style={styles.catList}>
-            {Object.entries(catTotals).map(([cat, amt]) => (
-              <View key={cat} style={styles.catRow}>
-                <View style={styles.catIcon}>
-                  <CText variant="bodyS">{CAT_ICONS[cat as ExpenseCategory] || '◓'}</CText>
+          <View style={styles.catSection}>
+            <CText variant="label" muted style={{ letterSpacing: 1, marginBottom: Spacing.xs }}>POR CATEGORÍA</CText>
+            {Object.entries(catTotals).map(([cat, amt]) => {
+              const meta = CAT_META[cat as ExpenseCategory] ?? { icon: '📦', color: Colors.lime, dk: Colors.limeDk };
+              const pct = budget > 0 ? Math.min(amt / budget, 1) : 0;
+              return (
+                <View key={cat} style={styles.catRow}>
+                  <View style={[styles.catIcon, { backgroundColor: meta.color }]}>
+                    <CText style={{ fontSize: 14 }}>{meta.icon}</CText>
+                  </View>
+                  <View style={styles.catInfo}>
+                    <View style={styles.catLabelRow}>
+                      <CText variant="body" weight="semi">{cat}</CText>
+                      <CText variant="label" style={{ color: meta.dk }}>S/{amt}</CText>
+                    </View>
+                    <View style={styles.catBarBg}>
+                      <View style={[styles.catBarFill, { width: `${pct * 100}%`, backgroundColor: meta.dk }]} />
+                    </View>
+                  </View>
                 </View>
-                <View style={styles.catInfo}>
-                  <CText variant="bodyM">{cat}</CText>
-                  <CProgressBar progress={budget > 0 ? amt / budget : 0} />
-                </View>
-                <CText variant="mono" style={styles.catAmt}>{amt}</CText>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
-        <CHairline style={{ marginVertical: Spacing.md }} />
-
         {/* View toggle */}
-        <View style={styles.viewToggle}>
-          <TouchableOpacity
-            onPress={() => setView('heatmap')}
-            style={[styles.toggleBtn, view === 'heatmap' && styles.toggleBtnActive]}
-            activeOpacity={0.7}
-          >
-            <CText variant="mono" style={view === 'heatmap' ? { color: Colors.white } : { color: Colors.ink }}>
-              CALENDARIO
-            </CText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setView('chat')}
-            style={[styles.toggleBtn, view === 'chat' && styles.toggleBtnActive]}
-            activeOpacity={0.7}
-          >
-            <CText variant="mono" style={view === 'chat' ? { color: Colors.white } : { color: Colors.ink }}>
-              MANAGER
-            </CText>
-          </TouchableOpacity>
+        <View style={styles.toggle}>
+          {(['heatmap', 'chat'] as const).map((v) => (
+            <TouchableOpacity
+              key={v}
+              onPress={() => setView(v)}
+              style={[styles.toggleBtn, view === v && styles.toggleBtnActive]}
+              activeOpacity={0.8}
+            >
+              <CText variant="label" weight="semi" style={{ color: view === v ? Colors.white : Colors.ink, letterSpacing: 0.5 }}>
+                {v === 'heatmap' ? '📅 Calendario' : '💬 Manager'}
+              </CText>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {view === 'heatmap' ? (
-          <Heatmap expenses={expenses} />
-        ) : (
-          <ConversationalView onOpenAdd={() => setShowAdd(true)} />
-        )}
+        <View style={styles.viewCard}>
+          {view === 'heatmap' ? <Heatmap expenses={expenses} /> : <ConversationalView />}
+        </View>
+
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
-        <CText style={{ color: Colors.white, fontSize: 24, lineHeight: 28 }}>+</CText>
+      <TouchableOpacity style={styles.fab} onPress={() => setShowAdd(true)} activeOpacity={0.85}>
+        <CText style={{ color: Colors.white, fontSize: 28, lineHeight: 32 }}>+</CText>
       </TouchableOpacity>
 
       <QuickAddModal visible={showAdd} onClose={() => setShowAdd(false)} />
@@ -348,155 +424,62 @@ export default function Gastos() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.paper },
-  container: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 100 },
-  eyebrow: { letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: Spacing.xs },
-  rule: { marginBottom: Spacing.md },
-  totalRow: { marginBottom: 4 },
-  totalNum: { lineHeight: 100 },
-  budgetLabel: { marginBottom: Spacing.sm },
-  catList: { marginTop: Spacing.md, gap: Spacing.sm },
-  catRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  catIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  container: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 110, gap: Spacing.sm },
+  header: { gap: 4 },
+
+  heroCard: {
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+    ...Shadow.card,
   },
+  heroNum: { fontSize: 56, fontFamily: 'Outfit_800ExtraBold', color: Colors.ink, lineHeight: 64 },
+  progressBg: {
+    height: 8,
+    backgroundColor: 'rgba(26,26,46,0.1)',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginTop: Spacing.xs,
+  },
+  progressFill: { height: 8, borderRadius: 4 },
+
+  catSection: { backgroundColor: Colors.white, borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm, ...Shadow.card },
+  catRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  catIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   catInfo: { flex: 1, gap: 4 },
-  catAmt: { width: 32, textAlign: 'right' },
-  viewToggle: { flexDirection: 'row', gap: Spacing.xs, marginBottom: Spacing.md },
+  catLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  catBarBg: { height: 6, backgroundColor: Colors.bg, borderRadius: 3, overflow: 'hidden' },
+  catBarFill: { height: 6, borderRadius: 3 },
+
+  toggle: { flexDirection: 'row', gap: Spacing.xs },
   toggleBtn: {
     flex: 1,
-    paddingVertical: 8,
-    borderRadius: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    alignItems: 'center',
-  },
-  toggleBtnActive: { backgroundColor: Colors.ink, borderColor: Colors.ink },
-  heatDayLabels: { flexDirection: 'row', marginBottom: 4 },
-  heatGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
-  heatCell: { alignItems: 'center', justifyContent: 'center', margin: 1 },
-  chatContainer: { gap: Spacing.sm },
-  chatTitle: { letterSpacing: 1.5, textTransform: 'uppercase' },
-  chatMessages: { maxHeight: 260 },
-  bubble: { padding: Spacing.sm, marginBottom: Spacing.xs, borderRadius: 3 },
-  bubbleManager: {
-    backgroundColor: Colors.surface,
-    borderLeftWidth: 2,
-    borderLeftColor: Colors.accent,
-  },
-  bubbleUser: {
-    backgroundColor: Colors.white,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    alignSelf: 'flex-end',
-    maxWidth: '80%',
-  },
-  bubbleLabel: { fontSize: 9, letterSpacing: 1.5, marginBottom: 4 },
-  bubbleText: { lineHeight: 22 },
-  chatInput: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: Colors.rule,
-    paddingTop: Spacing.sm,
-  },
-  chatTextInput: {
-    flex: 1,
     height: 40,
-    paddingHorizontal: Spacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    borderRadius: 2,
-    fontFamily: 'InstrumentSans_400Regular',
-    fontSize: 14,
-    color: Colors.ink,
+    borderRadius: Radius.pill,
     backgroundColor: Colors.white,
-  },
-  sendBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadow.card,
   },
+  toggleBtnActive: { backgroundColor: Colors.ink },
+
+  viewCard: { backgroundColor: Colors.white, borderRadius: Radius.card, padding: Spacing.md, ...Shadow.card },
+
   fab: {
     position: 'absolute',
     bottom: 90,
     right: Spacing.md,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.accent,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.ink,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.ink,
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
-  modalKAV: { justifyContent: 'flex-end' },
-  sheet: {
-    backgroundColor: Colors.paper,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    padding: Spacing.md,
-    gap: Spacing.sm,
-  },
-  sheetHandle: {
-    width: 36,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: Colors.rule,
-    alignSelf: 'center',
-    marginBottom: Spacing.sm,
-  },
-  sheetTitle: { letterSpacing: 1.5, textTransform: 'uppercase' },
-  fieldLabel: { letterSpacing: 1.2, textTransform: 'uppercase', marginTop: Spacing.xs },
-  amountRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  amountInput: {
-    flex: 1,
-    fontSize: 30,
-    fontFamily: 'InstrumentSerif_400Regular',
-    color: Colors.accent,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.rule,
-    paddingVertical: 4,
-  },
-  noteInput: {
-    height: 40,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    borderRadius: 2,
-    paddingHorizontal: Spacing.sm,
-    fontFamily: 'InstrumentSans_400Regular',
-    fontSize: 14,
-    color: Colors.ink,
-    backgroundColor: Colors.white,
-  },
-  catChips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
-  catChip: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    borderRadius: 2,
-    backgroundColor: Colors.white,
-  },
-  catChipActive: { backgroundColor: Colors.ink, borderColor: Colors.ink },
-  addBtn: {
-    height: 48,
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.sm,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 8,
   },
 });

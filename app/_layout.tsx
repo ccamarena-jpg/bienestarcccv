@@ -2,32 +2,38 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
-  InstrumentSerif_400Regular,
-  InstrumentSerif_400Regular_Italic,
-} from '@expo-google-fonts/instrument-serif';
-import {
-  useFonts as useSansFonts,
-  InstrumentSans_400Regular,
-  InstrumentSans_500Medium,
-  InstrumentSans_600SemiBold,
-} from '@expo-google-fonts/instrument-sans';
+  Outfit_400Regular,
+  Outfit_500Medium,
+  Outfit_600SemiBold,
+  Outfit_700Bold,
+  Outfit_800ExtraBold,
+} from '@expo-google-fonts/outfit';
 import {
   useFonts as useMonoFonts,
   JetBrainsMono_400Regular,
+  JetBrainsMono_600SemiBold,
 } from '@expo-google-fonts/jetbrains-mono';
 import { View, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/tokens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
-  const [serifLoaded] = useFonts({ InstrumentSerif_400Regular, InstrumentSerif_400Regular_Italic });
-  const [sansLoaded] = useSansFonts({ InstrumentSans_400Regular, InstrumentSans_500Medium, InstrumentSans_600SemiBold });
-  const [monoLoaded] = useMonoFonts({ JetBrainsMono_400Regular });
+  const [fontsLoaded] = useFonts({
+    Outfit_400Regular,
+    Outfit_500Medium,
+    Outfit_600SemiBold,
+    Outfit_700Bold,
+    Outfit_800ExtraBold,
+  });
+  const [monoLoaded] = useMonoFonts({
+    JetBrainsMono_400Regular,
+    JetBrainsMono_600SemiBold,
+  });
 
-  if (!serifLoaded || !sansLoaded || !monoLoaded) {
+  if (!fontsLoaded || !monoLoaded) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={Colors.accent} />
+        <ActivityIndicator color={Colors.lavenderDk} />
       </View>
     );
   }

@@ -42,7 +42,7 @@ function ProgressRing({ progress, size = 90, color }: { progress: number; size?:
         borderLeftColor:  clamped < 0.75 ? 'transparent' : Colors.white,
         transform: [{ rotate: '-90deg' }],
       }} />
-      <CText style={{ fontSize: 20, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.white }}>
+      <CText style={{ fontSize: 20, fontFamily: 'Outfit_600SemiBold', color: Colors.white }}>
         {pct}%
       </CText>
     </View>
@@ -235,13 +235,13 @@ const styles = StyleSheet.create({
   // Header
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   dateSmall: { fontSize: 12, color: Colors.muted, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 0.5 },
-  greeting: { fontSize: 24, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink, marginTop: 2 },
+  greeting: { fontSize: 24, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, marginTop: 2 },
   avatar: {
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: Colors.ink,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarLetter: { fontSize: 18, color: Colors.white, fontFamily: 'InstrumentSans_600SemiBold' },
+  avatarLetter: { fontSize: 18, color: Colors.white, fontFamily: 'Outfit_600SemiBold' },
 
   // Hero card
   heroCard: {
@@ -254,8 +254,8 @@ const styles = StyleSheet.create({
   },
   heroLeft: { flex: 1, gap: 6 },
   heroLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
-  heroAmt: { fontSize: 36, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink },
-  heroSub: { fontSize: 12, color: Colors.ink, opacity: 0.6, fontFamily: 'InstrumentSans_400Regular' },
+  heroAmt: { fontSize: 36, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  heroSub: { fontSize: 12, color: Colors.ink, opacity: 0.6, fontFamily: 'Outfit_400Regular' },
   heroTrack: { height: 6, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 3, marginTop: 4, overflow: 'hidden' },
   heroFill: { height: 6, borderRadius: 3 },
 
@@ -268,15 +268,15 @@ const styles = StyleSheet.create({
   },
   mealBigTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   mealBigLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
-  mealBigName: { fontSize: 18, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink, maxWidth: W * 0.55, marginTop: 4 },
+  mealBigName: { fontSize: 18, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, maxWidth: W * 0.55, marginTop: 4 },
   mealBigActions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   checkBadge: { backgroundColor: Colors.ink, borderRadius: Radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
-  checkBadgeText: { color: Colors.white, fontSize: 11, fontFamily: 'InstrumentSans_600SemiBold' },
-  arrowBtn: { fontSize: 18, color: Colors.ink, fontFamily: 'InstrumentSans_600SemiBold' },
+  checkBadgeText: { color: Colors.white, fontSize: 11, fontFamily: 'Outfit_600SemiBold' },
+  arrowBtn: { fontSize: 18, color: Colors.ink, fontFamily: 'Outfit_600SemiBold' },
   macroRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: Radius.cardSm, padding: Spacing.sm },
   macroItem: { flex: 1, alignItems: 'center', gap: 2 },
-  macroVal: { fontSize: 13, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink },
-  macroLabel: { fontSize: 10, color: Colors.ink, opacity: 0.55, fontFamily: 'InstrumentSans_400Regular' },
+  macroVal: { fontSize: 13, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  macroLabel: { fontSize: 10, color: Colors.ink, opacity: 0.55, fontFamily: 'Outfit_400Regular' },
   macroDivider: { width: 1, height: 28, backgroundColor: 'rgba(26,26,46,0.12)' },
 
   // Grid 2×2
@@ -291,10 +291,10 @@ const styles = StyleSheet.create({
     ...Shadow.card,
   },
   gridLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
-  gridName: { fontSize: 15, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink, flex: 1 },
-  gridArrow: { fontSize: 12, color: Colors.ink, opacity: 0.55, fontFamily: 'InstrumentSans_400Regular' },
+  gridName: { fontSize: 15, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, flex: 1 },
+  gridArrow: { fontSize: 12, color: Colors.ink, opacity: 0.55, fontFamily: 'Outfit_400Regular' },
   gridBadge: { backgroundColor: 'rgba(26,26,46,0.12)', borderRadius: Radius.pill, paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'flex-start' },
-  gridBadgeText: { fontSize: 10, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink },
+  gridBadgeText: { fontSize: 10, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
 
   // Stats
   statsCard: {
@@ -303,16 +303,16 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.sm,
   },
-  statsTitle: { fontSize: 15, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink },
+  statsTitle: { fontSize: 15, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
   statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   statItem: { alignItems: 'center', gap: 6 },
   statIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   statIconText: { fontSize: 18 },
-  statVal: { fontSize: 16, fontFamily: 'InstrumentSans_600SemiBold', color: Colors.ink },
-  statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'InstrumentSans_400Regular' },
+  statVal: { fontSize: 16, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
 
   // Manager
   managerCard: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm },
   managerEyebrow: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' },
-  managerMsg: { fontSize: 15, fontFamily: 'InstrumentSerif_400Regular_Italic', color: Colors.white, lineHeight: 24 },
+  managerMsg: { fontSize: 15, fontFamily: 'Outfit_400Regular', fontStyle: 'italic', color: Colors.white, lineHeight: 24 },
 });

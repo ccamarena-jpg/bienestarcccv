@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CText } from '../../components/clasica/CText';
-import { CCard } from '../../components/clasica/CCard';
-import { CHairline } from '../../components/clasica/CHairline';
-import { Colors, Spacing } from '../../constants/tokens';
+import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
 import {
   getRecetaDelDia,
   getRecetasPorCategoria,
@@ -13,11 +11,11 @@ import {
 } from '../../data/recetas';
 import { useAppStore } from '../../store/useAppStore';
 
-const CATEGORIAS: { id: Categoria; label: string; icon: string }[] = [
-  { id: 'desayuno', label: 'Desayuno', icon: '◐' },
-  { id: 'almuerzo', label: 'Almuerzo', icon: '◍' },
-  { id: 'cena',     label: 'Cena',     icon: '◎' },
-  { id: 'snack',    label: 'Snacks',   icon: '◑' },
+const CATEGORIAS: { id: Categoria; label: string; icon: string; color: string; dk: string }[] = [
+  { id: 'desayuno', label: 'Desayuno', icon: '☀️', color: Colors.yellow,   dk: Colors.yellowDk },
+  { id: 'almuerzo', label: 'Almuerzo', icon: '🍽️', color: Colors.mint,     dk: Colors.mintDk },
+  { id: 'cena',     label: 'Cena',     icon: '🌙', color: Colors.lavender, dk: Colors.lavenderDk },
+  { id: 'snack',    label: 'Snacks',   icon: '🥝', color: Colors.coral,    dk: Colors.coralDk },
 ];
 
 export default function Cocina() {
@@ -27,64 +25,79 @@ export default function Cocina() {
   const recetaDelDia = getRecetaDelDia(catActiva);
   const opciones = getRecetasPorCategoria(catActiva);
   const selActual = selectedRecipes[catActiva] ?? null;
+  const catInfo = CATEGORIAS.find((c) => c.id === catActiva)!;
 
   const toggleSeleccion = (receta: Receta) => {
     selectRecipe(catActiva, selActual === receta.id ? null : receta.id);
   };
 
+  const hasAnySelection = Object.values(selectedRecipes).some((v) => v !== null);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <CText variant="mono" muted style={styles.eyebrow}>COCINA · HOY</CText>
-        <CHairline style={styles.rule} />
 
-        {/* Resumen de lo seleccionado */}
-        {Object.entries(selectedRecipes).some(([, v]) => v !== null) && (
-          <CCard style={styles.resumenCard}>
-            <CText variant="mono" muted style={styles.resumenTitle}>MI PLAN HOY</CText>
+        {/* Header */}
+        <View style={styles.header}>
+          <CText variant="title" weight="bold" style={styles.title}>Cocina</CText>
+          <CText variant="body" muted>Tu menú de hoy</CText>
+        </View>
+
+        {/* Mi Plan Hoy */}
+        {hasAnySelection && (
+          <View style={styles.planCard}>
+            <CText variant="label" weight="semi" style={{ color: Colors.mintDk, letterSpacing: 1, marginBottom: Spacing.xs }}>
+              MI PLAN HOY
+            </CText>
             {(Object.entries(selectedRecipes) as [Categoria, string | null][]).map(([cat, id]) => {
               if (!id) return null;
               const r = getRecetasPorCategoria(cat).find((x) => x.id === id);
               if (!r) return null;
+              const info = CATEGORIAS.find((c) => c.id === cat);
               return (
-                <View key={cat} style={styles.resumenRow}>
-                  <CText variant="mono" muted style={styles.resumenCat}>
-                    {CATEGORIAS.find((c) => c.id === cat)?.icon} {cat.toUpperCase()}
-                  </CText>
-                  <CText variant="bodyM" serif style={styles.resumenNombre}>{r.nombre}</CText>
+                <View key={cat} style={styles.planRow}>
+                  <View style={[styles.planDot, { backgroundColor: info?.dk ?? Colors.mintDk }]} />
+                  <CText variant="bodyS" muted style={{ width: 72 }}>{info?.label}</CText>
+                  <CText variant="body" weight="semi" style={{ flex: 1 }}>{r.nombre}</CText>
                 </View>
               );
             })}
-          </CCard>
+          </View>
         )}
 
-        {/* Selector de categoría */}
-        <View style={styles.catSelector}>
+        {/* Category tabs */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
           {CATEGORIAS.map((cat) => {
-            const tieneSeleccion = !!selectedRecipes[cat.id];
+            const active = catActiva === cat.id;
+            const hasSelection = !!selectedRecipes[cat.id];
             return (
               <TouchableOpacity
                 key={cat.id}
                 onPress={() => setCatActiva(cat.id)}
-                style={[styles.catBtn, catActiva === cat.id && styles.catBtnActive]}
-                activeOpacity={0.7}
+                style={[
+                  styles.catPill,
+                  { backgroundColor: active ? Colors.ink : cat.color },
+                ]}
+                activeOpacity={0.8}
               >
+                <CText style={{ fontSize: 14 }}>{cat.icon}</CText>
                 <CText
-                  variant="mono"
-                  style={[styles.catBtnLabel, catActiva === cat.id && styles.catBtnLabelActive]}
+                  variant="label"
+                  weight="semi"
+                  style={{ color: active ? Colors.white : Colors.ink, letterSpacing: 0.5 }}
                 >
-                  {tieneSeleccion ? '✓ ' : ''}{cat.label.toUpperCase()}
+                  {hasSelection ? '✓ ' : ''}{cat.label}
                 </CText>
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
 
-        <CText variant="bodyS" muted style={styles.hint}>
-          Toca la que harás hoy. Toca de nuevo para deseleccionar.
+        <CText variant="bodyS" muted style={{ marginBottom: Spacing.xs }}>
+          Toca para marcar lo que harás hoy
         </CText>
 
-        {/* Lista de recetas */}
+        {/* Recipe list */}
         <View style={styles.lista}>
           {opciones.map((r) => {
             const esDelDia = r.id === recetaDelDia.id;
@@ -94,61 +107,61 @@ export default function Cocina() {
               <TouchableOpacity
                 key={r.id}
                 onPress={() => toggleSeleccion(r)}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <CCard style={[
+                <View style={[
                   styles.recetaCard,
-                  esDelDia && !seleccionada && styles.recetaCardHoy,
-                  seleccionada && styles.recetaCardSel,
+                  { backgroundColor: seleccionada ? catInfo.color : Colors.white },
+                  seleccionada && { borderWidth: 2, borderColor: catInfo.dk },
                 ]}>
+                  {/* Top row */}
                   <View style={styles.recetaHeader}>
-                    <View style={styles.recetaTitles}>
+                    <View style={{ flex: 1 }}>
                       {esDelDia && !seleccionada && (
-                        <CText variant="mono" accent style={styles.hoyLabel}>HOY ·</CText>
+                        <View style={[styles.hoyBadge, { backgroundColor: catInfo.color }]}>
+                          <CText variant="label" style={{ color: catInfo.dk, fontSize: 9 }}>SUGERIDO HOY</CText>
+                        </View>
                       )}
-                      <CText
-                        variant="bodyL"
-                        serif
-                        style={[styles.recetaNombre, seleccionada && { color: Colors.accent }]}
-                      >
+                      <CText variant="subtitle" weight="semi" style={{ color: Colors.ink, marginTop: esDelDia && !seleccionada ? 4 : 0 }}>
                         {r.nombre}
                       </CText>
                     </View>
-                    {seleccionada ? (
-                      <View style={styles.checkCircle}>
-                        <CText style={{ color: Colors.white, fontSize: 12 }}>✓</CText>
-                      </View>
-                    ) : (
-                      <View style={styles.emptyCircle} />
-                    )}
+                    <View style={[styles.checkCircle, seleccionada && { backgroundColor: catInfo.dk, borderColor: catInfo.dk }]}>
+                      {seleccionada && <CText style={{ color: Colors.white, fontSize: 11 }}>✓</CText>}
+                    </View>
                   </View>
 
-                  <CText variant="bodyS" muted numberOfLines={2} style={styles.recetaDesc}>
+                  <CText variant="bodyS" muted numberOfLines={2} style={{ lineHeight: 18 }}>
                     {r.descripcion}
                   </CText>
 
-                  <View style={styles.recetaMeta}>
-                    <CText variant="mono" muted style={styles.metaItem}>{r.tiempo}</CText>
-                    <CText variant="mono" muted style={styles.metaItem}>·</CText>
-                    <CText variant="mono" muted style={styles.metaItem}>{r.proteina} prot.</CText>
-                    <CText variant="mono" muted style={styles.metaItem}>·</CText>
-                    <CText variant="mono" muted style={styles.metaItem}>{r.costo}</CText>
+                  {/* Meta chips */}
+                  <View style={styles.metaRow}>
+                    <View style={[styles.metaChip, { backgroundColor: Colors.bg }]}>
+                      <CText variant="label" muted>⏱ {r.tiempo}</CText>
+                    </View>
+                    <View style={[styles.metaChip, { backgroundColor: Colors.bg }]}>
+                      <CText variant="label" muted>💪 {r.proteina}</CText>
+                    </View>
+                    <View style={[styles.metaChip, { backgroundColor: Colors.bg }]}>
+                      <CText variant="label" muted>💰 {r.costo}</CText>
+                    </View>
                     {r.prepDomingo && (
-                      <>
-                        <CText variant="mono" muted style={styles.metaItem}>·</CText>
-                        <CText variant="mono" accent style={styles.metaItem}>prep✓</CText>
-                      </>
+                      <View style={[styles.metaChip, { backgroundColor: Colors.mint }]}>
+                        <CText variant="label" style={{ color: Colors.mintDk }}>prep ✓</CText>
+                      </View>
                     )}
                   </View>
 
-                  <View style={styles.antiMini}>
+                  {/* Anti-inflamatorio tags */}
+                  <View style={styles.antiRow}>
                     {r.antiInflamatorio.slice(0, 3).map((a) => (
                       <View key={a} style={styles.antiChip}>
-                        <CText style={{ fontSize: 9, color: Colors.accent }}>{a}</CText>
+                        <CText style={{ fontSize: 9, color: Colors.mintDk }}>{a}</CText>
                       </View>
                     ))}
                   </View>
-                </CCard>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -159,74 +172,69 @@ export default function Cocina() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.paper },
-  container: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: Spacing.xl },
-  eyebrow: { letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: Spacing.xs },
-  rule: { marginBottom: Spacing.md },
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  container: { paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 100, gap: Spacing.sm },
+  header: { gap: 4, marginBottom: Spacing.xs },
+  title: { fontSize: 28, color: Colors.ink },
 
-  resumenCard: {
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
-    backgroundColor: '#fdf6f3',
-    borderColor: Colors.accent + '44',
-    borderWidth: 1,
+  planCard: {
+    backgroundColor: Colors.mint,
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    gap: 6,
+    ...Shadow.card,
   },
-  resumenTitle: { fontSize: 9, letterSpacing: 1.5, marginBottom: 4 },
-  resumenRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  resumenCat: { fontSize: 9, letterSpacing: 1, width: 80 },
-  resumenNombre: { flex: 1 },
+  planRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  planDot: { width: 8, height: 8, borderRadius: 4 },
 
-  catSelector: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs, marginBottom: Spacing.sm },
-  catBtn: {
+  catRow: { flexDirection: 'row', gap: Spacing.xs, paddingBottom: Spacing.xs },
+  catPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 7,
-    borderRadius: 2,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.rule,
-    backgroundColor: Colors.white,
+    paddingVertical: 8,
+    borderRadius: Radius.pill,
   },
-  catBtnActive: { backgroundColor: Colors.ink, borderColor: Colors.ink },
-  catBtnLabel: { fontSize: 10, letterSpacing: 1, color: Colors.muted },
-  catBtnLabelActive: { color: Colors.white },
-
-  hint: { marginBottom: Spacing.md, lineHeight: 18 },
 
   lista: { gap: Spacing.sm },
-  recetaCard: { gap: Spacing.xs },
-  recetaCardHoy: { borderColor: Colors.accent + '88', borderWidth: 1 },
-  recetaCardSel: { borderColor: Colors.accent, borderWidth: 2, backgroundColor: '#fdf6f3' },
-
-  recetaHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  recetaTitles: { flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 4, flexWrap: 'wrap' },
-  hoyLabel: { fontSize: 10, letterSpacing: 1 },
-  recetaNombre: { flex: 1 },
-
+  recetaCard: {
+    borderRadius: Radius.card,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+    ...Shadow.card,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  recetaHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm },
+  hoyBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: Radius.pill,
+  },
   checkCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.accent,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: Colors.rule,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: Colors.white,
+    marginTop: 2,
   },
-  emptyCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.rule,
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
+  metaChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: Radius.pill,
   },
-
-  recetaDesc: { lineHeight: 18 },
-  recetaMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, alignItems: 'center' },
-  metaItem: { fontSize: 10, letterSpacing: 0.5 },
-  antiMini: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  antiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   antiChip: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: Colors.accent + '44',
-    borderRadius: 2,
-    backgroundColor: '#fdf6f3',
+    backgroundColor: Colors.mint,
+    borderRadius: Radius.pill,
   },
 });
