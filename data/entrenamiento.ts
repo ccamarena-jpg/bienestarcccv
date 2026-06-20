@@ -4,6 +4,7 @@ export type TipoSesion = 'gym' | 'cardio' | 'descanso' | 'opcional';
 export type DiaEntrenamiento = {
   dia: string;
   sesion: string;
+  horario: string;
   duracion: string;
   objetivo: string;
   detalle: string;
@@ -19,6 +20,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Domingo',
     sesion: 'Descanso total',
+    horario: 'Libre',
     duracion: '—',
     objetivo: 'Recuperación',
     detalle: 'Sueño, caminata opcional, preparación de snacks para la semana.',
@@ -31,6 +33,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Lunes',
     sesion: 'Descanso activo / caminata',
+    horario: 'Libre',
     duracion: '20–40 min',
     objetivo: 'Recuperación',
     detalle: 'Caminata suave, movilidad o respiración 10 min. Bajar estrés.',
@@ -43,6 +46,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Martes',
     sesion: 'GYM A: Pierna + glúteo',
+    horario: '6:30 am',
     duracion: '55–65 min',
     objetivo: 'Músculo',
     detalle: 'Día de fuerza de pierna. Prioritario para recomposición.',
@@ -61,6 +65,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Miércoles',
     sesion: 'Barre / Pilates (opcional)',
+    horario: '7:00 am',
     duracion: '45–55 min',
     objetivo: 'Core + movilidad',
     detalle: 'Solo si tienes energía. No reemplaza el gym. Foco en control y postura.',
@@ -73,6 +78,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Jueves',
     sesion: 'Spinning',
+    horario: '7:00 am',
     duracion: '45–50 min',
     objetivo: 'Cardio intenso',
     detalle: 'Mantener 1 sesión fuerte de cardio. Evitar sumar otro HIIT si estás agotada.',
@@ -85,6 +91,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Viernes',
     sesion: 'Descanso activo',
+    horario: 'Libre',
     duracion: '20–30 min',
     objetivo: 'Bajar cortisol',
     detalle: 'Caminata, stretching, respiración o descanso real. No forzar intensidad.',
@@ -97,6 +104,7 @@ export const PLAN_SEMANAL: DiaEntrenamiento[] = [
   {
     dia: 'Sábado',
     sesion: 'GYM B: Superior + glúteo',
+    horario: '7:30 am',
     duracion: '55–65 min',
     objetivo: 'Tono + postura',
     detalle: 'Fuerza de tren superior. Hip thrust ligero para complementar glúteo.',

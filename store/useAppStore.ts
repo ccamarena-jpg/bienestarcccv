@@ -3,6 +3,23 @@ import * as SheetsService from '../services/sheets';
 
 export type ExpenseCategory = 'Alim.' | 'Salud' | 'Ocio' | 'Trans.' | 'Hogar' | 'Otro';
 
+export interface EntrenoLog {
+  hecho: boolean;
+  sesionReal?: string;
+  horaReal?: string;
+  rpe?: number;
+  notas?: string;
+}
+
+export interface MenuLog {
+  preEntreno?: string;
+  desayuno?: string;
+  mediaManana?: string;
+  almuerzo?: string;
+  snackTarde?: string;
+  cena?: string;
+}
+
 export interface Expense {
   id: string;
   cat: ExpenseCategory;
@@ -40,6 +57,12 @@ interface AppState {
 
   selectedRecipes: Record<string, string | null>;
   selectRecipe: (categoria: string, recetaId: string | null) => void;
+
+  entrenoLogs: Record<string, EntrenoLog>;
+  setEntrenoLog: (fecha: string, log: Partial<EntrenoLog>) => void;
+
+  menuLogs: Record<string, MenuLog>;
+  setMenuLog: (fecha: string, log: Partial<MenuLog>) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -93,4 +116,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedRecipes: { desayuno: null, almuerzo: null, cena: null, snack: null },
   selectRecipe: (categoria, recetaId) =>
     set((s) => ({ selectedRecipes: { ...s.selectedRecipes, [categoria]: recetaId } })),
+
+  entrenoLogs: {},
+  setEntrenoLog: (fecha, log) =>
+    set((s) => ({
+      entrenoLogs: {
+        ...s.entrenoLogs,
+        [fecha]: { ...s.entrenoLogs[fecha], ...log },
+      },
+    })),
+
+  menuLogs: {},
+  setMenuLog: (fecha, log) =>
+    set((s) => ({
+      menuLogs: {
+        ...s.menuLogs,
+        [fecha]: { ...s.menuLogs[fecha], ...log },
+      },
+    })),
 }));
