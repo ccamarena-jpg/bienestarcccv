@@ -117,6 +117,22 @@ export default function Configuracion() {
           </TouchableOpacity>
         </View>
 
+        {/* Accesos rápidos */}
+        <TouchableOpacity
+          style={[styles.card, { backgroundColor: Colors.lime, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }]}
+          onPress={() => router.push('/compras')}
+          activeOpacity={0.85}
+        >
+          <View style={[styles.cardIcon, { backgroundColor: Colors.limeDk + '33' }]}>
+            <CText style={{ fontSize: 20 }}>🛒</CText>
+          </View>
+          <View style={{ flex: 1 }}>
+            <CText variant="subtitle" weight="bold">Lista de compras</CText>
+            <CText variant="bodyS" muted>Tu súper semanal + recetas rápidas</CText>
+          </View>
+          <CText style={{ fontSize: 18, color: Colors.ink }}>→</CText>
+        </TouchableOpacity>
+
         {/* Info card */}
         <View style={[styles.card, { backgroundColor: Colors.sky }]}>
           <View style={styles.cardHeader}>

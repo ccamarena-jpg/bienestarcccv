@@ -6,6 +6,8 @@ import { CText } from '../../components/clasica/CText';
 import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
 import { useAppStore } from '../../store/useAppStore';
 import { getRecetasPorCategoria, getRecetaDelDia } from '../../data/recetas';
+import { getEntrenamientoHoy } from '../../data/entrenamiento';
+import { getMenuHoy } from '../../data/menuSemanal';
 
 const W = Dimensions.get('window').width;
 
@@ -62,6 +64,9 @@ export default function Hoy() {
   const desayunoFijado = !!selectedRecipes['desayuno'];
   const almuerzoFijado = !!selectedRecipes['almuerzo'];
   const cenaFijada     = !!selectedRecipes['cena'];
+
+  const entreno = getEntrenamientoHoy();
+  const menu = getMenuHoy();
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -171,8 +176,8 @@ export default function Hoy() {
             onPress={toggleWorkout}
             activeOpacity={0.85}
           >
-            <CText style={styles.gridLabel}>ENTRENO</CText>
-            <CText style={styles.gridName}>Empuje{'\n'}medio</CText>
+            <CText style={styles.gridLabel}>ENTRENO {entreno.icon}</CText>
+            <CText style={styles.gridName} numberOfLines={3}>{entreno.sesion}</CText>
             <CText style={[styles.gridArrow, workoutDone && { color: Colors.limeDk, fontWeight: '700' }]}>
               {workoutDone ? '✓ Hecho' : 'Marcar →'}
             </CText>
@@ -210,13 +215,36 @@ export default function Hoy() {
           </View>
         </View>
 
+        {/* ── Nutrición del día (del Excel) ── */}
+        <View style={[styles.statsCard, Shadow.card, { backgroundColor: Colors.yellow }]}>
+          <CText style={[styles.statsTitle, { color: Colors.yellowDk }]}>🍽️ Menú sugerido hoy · {menu.dia}</CText>
+          {[
+            { label: 'Pre-entreno', val: menu.preEntreno, show: menu.preEntreno !== '—' },
+            { label: 'Desayuno',    val: menu.desayuno,    show: true },
+            { label: 'Media mañana', val: menu.mediaManana, show: true },
+            { label: 'Almuerzo',    val: menu.almuerzo,    show: true },
+            { label: 'Snack',       val: menu.snackTarde,  show: true },
+            { label: 'Cena',        val: menu.cena,        show: true },
+          ].filter(i => i.show).map(({ label, val }) => (
+            <View key={label} style={styles.menuRow}>
+              <CText style={[styles.menuLabel, { color: Colors.yellowDk }]}>{label}</CText>
+              <CText style={styles.menuVal} numberOfLines={2}>{val}</CText>
+            </View>
+          ))}
+          <View style={styles.proteinaBadge}>
+            <CText style={{ fontSize: 11, fontFamily: 'Outfit_600SemiBold', color: Colors.white }}>
+              💪 ~{menu.proteinaEstimada} g proteína hoy
+            </CText>
+          </View>
+        </View>
+
         {/* ── Manager ── */}
         <View style={[styles.managerCard, { backgroundColor: Colors.ink }]}>
           <CText style={styles.managerEyebrow}>EL MANAGER</CText>
           <CText style={styles.managerMsg}>
-            {almuerzoFijado
-              ? `"Elegiste ${almuerzo.nombre} para el almuerzo. Llevas S/${spent} de S/${budget}.${workoutDone ? ' Entreno marcado. Día redondo.' : ' El entreno de las 18:30 completa el día.'}"`
-              : `"Llevas S/${spent} de S/${budget} hoy. Ve a Cocina y elige tus comidas para armar tu día."`
+            {workoutDone
+              ? `"${entreno.sesion} marcado ✓ Llevas S/${spent} de S/${budget}. ${menu.proteinaEstimada >= 90 ? 'Día en camino.' : 'Apunta a 90 g de proteína hoy.'}"`
+              : `"Hoy es ${entreno.dia}: ${entreno.sesion} · ${entreno.duracion}. ${entreno.notasNutricion}"`
             }
           </CText>
         </View>
@@ -310,6 +338,19 @@ const styles = StyleSheet.create({
   statIconText: { fontSize: 18 },
   statVal: { fontSize: 16, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
   statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
+
+  // Menú del día
+  menuRow: { flexDirection: 'row', gap: Spacing.xs, alignItems: 'flex-start', marginBottom: 4 },
+  menuLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 0.5, width: 80, paddingTop: 1 },
+  menuVal: { flex: 1, fontSize: 13, fontFamily: 'Outfit_400Regular', color: Colors.ink, lineHeight: 18 },
+  proteinaBadge: {
+    backgroundColor: Colors.yellowDk,
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+    marginTop: Spacing.xs,
+  },
 
   // Manager
   managerCard: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm },
