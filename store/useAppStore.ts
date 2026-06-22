@@ -11,6 +11,13 @@ export interface EntrenoLog {
   notas?: string;
 }
 
+export interface CustomFoodItem {
+  id: string;
+  nombre: string;
+  proteina: number;
+  kcal: number;
+}
+
 export interface MenuLog {
   preEntreno?: string;
   desayuno?: string;
@@ -18,6 +25,7 @@ export interface MenuLog {
   almuerzo?: string;
   snackTarde?: string;
   cena?: string;
+  extras?: CustomFoodItem[];
 }
 
 export interface Expense {
@@ -62,7 +70,9 @@ interface AppState {
   setEntrenoLog: (fecha: string, log: Partial<EntrenoLog>) => void;
 
   menuLogs: Record<string, MenuLog>;
-  setMenuLog: (fecha: string, log: Partial<MenuLog>) => void;
+  setMenuLog: (fecha: string, log: Partial<Omit<MenuLog, 'extras'>>) => void;
+  addMenuExtra: (fecha: string, item: Omit<CustomFoodItem, 'id'>) => void;
+  removeMenuExtra: (fecha: string, itemId: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -134,4 +144,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         [fecha]: { ...s.menuLogs[fecha], ...log },
       },
     })),
+
+  addMenuExtra: (fecha, item) =>
+    set((s) => {
+      const existing = s.menuLogs[fecha] ?? {};
+      const extras = [...(existing.extras ?? []), { ...item, id: Date.now().toString() }];
+      return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+    }),
+
+  removeMenuExtra: (fecha, itemId) =>
+    set((s) => {
+      const existing = s.menuLogs[fecha] ?? {};
+      const extras = (existing.extras ?? []).filter((e) => e.id !== itemId);
+      return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+    }),
 }));

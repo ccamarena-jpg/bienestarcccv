@@ -1,3 +1,12 @@
+export type ProteinaPorComida = {
+  preEntreno: number;
+  desayuno: number;
+  mediaManana: number;
+  almuerzo: number;
+  snackTarde: number;
+  cena: number;
+};
+
 export type DiaMenu = {
   dia: string;
   tipo: string;
@@ -8,6 +17,7 @@ export type DiaMenu = {
   snackTarde: string;
   cena: string;
   proteinaEstimada: number;
+  proteinaPorComida: ProteinaPorComida;
 };
 
 // Índice 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
@@ -22,6 +32,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Chocolate 70% o zanahorias + guacamole',
     cena: 'Cena ligera: cottage + tostadas integrales + crema de espinaca',
     proteinaEstimada: 88,
+    proteinaPorComida: { preEntreno: 0, desayuno: 22, mediaManana: 12, almuerzo: 33, snackTarde: 4, cena: 17 },
   },
   {
     dia: 'Lunes',
@@ -33,6 +44,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Cottage + zanahorias baby',
     cena: 'Tortilla de espinaca, cebolla y pimiento',
     proteinaEstimada: 90,
+    proteinaPorComida: { preEntreno: 0, desayuno: 24, mediaManana: 11, almuerzo: 32, snackTarde: 14, cena: 12 },
   },
   {
     dia: 'Martes',
@@ -44,6 +56,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Tomate cherry + cottage',
     cena: 'Pescado a la plancha + verduras',
     proteinaEstimada: 98,
+    proteinaPorComida: { preEntreno: 1, desayuno: 28, mediaManana: 7, almuerzo: 34, snackTarde: 12, cena: 22 },
   },
   {
     dia: 'Miércoles',
@@ -55,6 +68,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Kéfir + fresas',
     cena: 'Crema de verduras + pollo desmenuzado',
     proteinaEstimada: 92,
+    proteinaPorComida: { preEntreno: 8, desayuno: 14, mediaManana: 4, almuerzo: 36, snackTarde: 7, cena: 23 },
   },
   {
     dia: 'Jueves',
@@ -66,6 +80,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Yogur griego + canela',
     cena: 'Ensalada grande + atún/huevo',
     proteinaEstimada: 95,
+    proteinaPorComida: { preEntreno: 2, desayuno: 20, mediaManana: 14, almuerzo: 34, snackTarde: 10, cena: 17 },
   },
   {
     dia: 'Viernes',
@@ -77,6 +92,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Piña + cottage',
     cena: 'Sopa de lentejas con verduras',
     proteinaEstimada: 90,
+    proteinaPorComida: { preEntreno: 0, desayuno: 18, mediaManana: 7, almuerzo: 28, snackTarde: 15, cena: 18 },
   },
   {
     dia: 'Sábado',
@@ -88,6 +104,7 @@ export const MENU_SEMANAL: DiaMenu[] = [
     snackTarde: 'Kéfir + chía',
     cena: 'Pollo/pavo en tortilla integral con lechuga y pimiento',
     proteinaEstimada: 96,
+    proteinaPorComida: { preEntreno: 3, desayuno: 30, mediaManana: 4, almuerzo: 30, snackTarde: 7, cena: 24 },
   },
 ];
 
