@@ -1,27 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import platformStorage from './storage';
 import * as SheetsService from '../services/sheets';
 
-const webStorage = {
-  getItem: (key: string) => {
-    if (typeof localStorage === 'undefined') return null;
-    return localStorage.getItem(key);
-  },
-  setItem: (key: string, value: string) => {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(key, value);
-  },
-  removeItem: (key: string) => {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.removeItem(key);
-  },
-};
-
-const storage = Platform.OS === 'web'
-  ? createJSONStorage(() => webStorage)
-  : createJSONStorage(() => AsyncStorage);
+const storage = createJSONStorage(() => platformStorage);
 
 export type ExpenseCategory = 'Alim.' | 'Salud' | 'Ocio' | 'Trans.' | 'Hogar' | 'Otro';
 
