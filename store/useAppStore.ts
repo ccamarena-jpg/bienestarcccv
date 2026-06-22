@@ -1,7 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SheetsService from '../services/sheets';
+
+const storage = Platform.OS === 'web'
+  ? createJSONStorage(() => localStorage)
+  : createJSONStorage(() => AsyncStorage);
 
 export type ExpenseCategory = 'Alim.' | 'Salud' | 'Ocio' | 'Trans.' | 'Hogar' | 'Otro';
 
@@ -174,7 +179,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'bitacora-store',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage,
       partialize: (state) => ({
         userName: state.userName,
         onboardingDone: state.onboardingDone,
