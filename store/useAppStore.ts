@@ -14,8 +14,12 @@ export interface EntrenoLog {
 export interface CustomFoodItem {
   id: string;
   nombre: string;
-  proteina: number;
+  porcion: string;
+  cantidad: number;
   kcal: number;
+  proteina: number;
+  carbs: number;
+  grasas: number;
 }
 
 export interface MenuLog {
@@ -82,7 +86,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     SheetsService.setConfig('nombre', name).catch(() => {});
   },
 
-  onboardingDone: false,
+  onboardingDone: true,
   setOnboardingDone: (v) => set({ onboardingDone: v }),
 
   goals: [],
@@ -148,7 +152,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   addMenuExtra: (fecha, item) =>
     set((s) => {
       const existing = s.menuLogs[fecha] ?? {};
-      const extras = [...(existing.extras ?? []), { ...item, id: Date.now().toString() }];
+      const extras = [
+        ...(existing.extras ?? []),
+        { ...item, id: Date.now().toString() },
+      ];
       return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
     }),
 

@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import {
-  View, ScrollView, StyleSheet, TouchableOpacity,
-  Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform,
-} from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { CText } from '../../components/clasica/CText';
 import { Colors, Spacing, Radius, Shadow } from '../../constants/tokens';
-import { useAppStore, type MenuLog, type CustomFoodItem } from '../../store/useAppStore';
+import { useAppStore, type MenuLog } from '../../store/useAppStore';
 import { getEntrenamientoHoy } from '../../data/entrenamiento';
 import { getMenuHoy, type DiaMenu } from '../../data/menuSemanal';
+import { MenuComidaSheet } from '../../components/MenuComidaSheet';
 
 const W = Dimensions.get('window').width;
 
@@ -45,10 +43,10 @@ function ProgressRing({ progress, size = 90 }: { progress: number; size?: number
   );
 }
 
-// ── Tipos de comida ───────────────────────────────────────────────────────────
+// ── Configuración de comidas ──────────────────────────────────────────────────
 type MealKey = keyof Omit<MenuLog, 'extras'>;
 
-const MEALS: { key: MealKey; label: string; icon: string; color: string; dk: string }[] = [
+const MEAL_META: { key: MealKey; label: string; icon: string; color: string; dk: string }[] = [
   { key: 'preEntreno',  label: 'Pre-entreno',  icon: '⚡', color: Colors.sky,      dk: Colors.skyDk },
   { key: 'desayuno',    label: 'Desayuno',     icon: '🥣', color: Colors.yellow,   dk: Colors.yellowDk },
   { key: 'mediaManana', label: 'Media mañana', icon: '🍎', color: Colors.mint,     dk: Colors.mintDk },
@@ -57,281 +55,90 @@ const MEALS: { key: MealKey; label: string; icon: string; color: string; dk: str
   { key: 'cena',        label: 'Cena',         icon: '🌙', color: Colors.lavender, dk: Colors.lavenderDk },
 ];
 
-function getMealPlanValue(key: MealKey, menu: DiaMenu): string {
-  const map: Record<MealKey, string> = {
-    preEntreno: menu.preEntreno,
-    desayuno: menu.desayuno,
-    mediaManana: menu.mediaManana,
-    almuerzo: menu.almuerzo,
-    snackTarde: menu.snackTarde,
-    cena: menu.cena,
+function getPlanText(key: MealKey, menu: DiaMenu): string {
+  const m: Record<MealKey, string> = {
+    preEntreno: menu.preEntreno, desayuno: menu.desayuno,
+    mediaManana: menu.mediaManana, almuerzo: menu.almuerzo,
+    snackTarde: menu.snackTarde, cena: menu.cena,
   };
-  return map[key];
+  return m[key];
 }
 
-function getMealProtein(key: MealKey, menu: DiaMenu): number {
+function getPlanProt(key: MealKey, menu: DiaMenu): number {
   return menu.proteinaPorComida[key];
 }
 
-// ── Modal detalle de comida ───────────────────────────────────────────────────
-function MenuComidaModal({
-  visible,
-  mealKey,
-  menu,
-  menuLog,
-  fecha,
-  onClose,
-}: {
-  visible: boolean;
-  mealKey: MealKey;
-  menu: DiaMenu;
-  menuLog: MenuLog;
-  fecha: string;
-  onClose: () => void;
-}) {
-  const { setMenuLog, addMenuExtra, removeMenuExtra } = useAppStore();
-  const insets = useSafeAreaInsets();
-  const meta = MEALS.find((m) => m.key === mealKey)!;
-  const planValue = getMealPlanValue(mealKey, menu);
-  const proteinaPlan = getMealProtein(mealKey, menu);
-
-  const [override, setOverride] = useState(menuLog[mealKey] ?? '');
-  const [addingExtra, setAddingExtra] = useState(false);
-  const [extraNombre, setExtraNombre] = useState('');
-  const [extraProteina, setExtraProteina] = useState('');
-  const [extraKcal, setExtraKcal] = useState('');
-
-  const extras = menuLog.extras ?? [];
-  const totalExtrasProteina = extras.reduce((s, e) => s + e.proteina, 0);
-  const totalExtrasKcal = extras.reduce((s, e) => s + e.kcal, 0);
-
-  const guardarOverride = () => {
-    if (override.trim()) {
-      setMenuLog(fecha, { [mealKey]: override.trim() });
-    }
-  };
-
-  const agregarExtra = () => {
-    const p = parseFloat(extraProteina);
-    const k = parseFloat(extraKcal);
-    if (!extraNombre.trim() || isNaN(p)) return;
-    addMenuExtra(fecha, { nombre: extraNombre.trim(), proteina: p, kcal: isNaN(k) ? 0 : k });
-    setExtraNombre('');
-    setExtraProteina('');
-    setExtraKcal('');
-    setAddingExtra(false);
-  };
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <TouchableOpacity style={msh.overlay} activeOpacity={1} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={msh.kav}>
-        <View style={[msh.panel, { paddingBottom: insets.bottom + Spacing.md }]}>
-          <View style={msh.handle} />
-
-          {/* Header */}
-          <View style={[msh.header, { backgroundColor: meta.color }]}>
-            <CText style={{ fontSize: 28 }}>{meta.icon}</CText>
-            <View style={{ flex: 1 }}>
-              <CText variant="label" muted style={{ letterSpacing: 1 }}>{meta.label.toUpperCase()}</CText>
-              <CText variant="subtitle" weight="bold" style={{ color: Colors.ink }}>{menu.dia}</CText>
-            </View>
-            {proteinaPlan > 0 && (
-              <View style={[msh.protBadge, { backgroundColor: meta.dk }]}>
-                <CText variant="label" style={{ color: Colors.white }}>💪 ~{proteinaPlan} g</CText>
-              </View>
-            )}
-          </View>
-
-          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 480 }}>
-            {/* Plan del día */}
-            <CText variant="label" muted style={msh.sectionLabel}>PLAN DEL DÍA</CText>
-            <View style={[msh.planBox, { backgroundColor: meta.color + '60' }]}>
-              <CText variant="body" style={{ color: Colors.ink, lineHeight: 20 }}>{planValue}</CText>
-            </View>
-
-            {/* Lo que comiste */}
-            <CText variant="label" muted style={msh.sectionLabel}>¿QUÉ COMISTE? (opcional)</CText>
-            <TextInput
-              value={override}
-              onChangeText={setOverride}
-              onEndEditing={guardarOverride}
-              style={[msh.input, { height: 70, textAlignVertical: 'top', paddingTop: Spacing.sm }]}
-              placeholder={planValue === '—' ? 'Escribe lo que comiste…' : planValue}
-              placeholderTextColor={Colors.muted}
-              multiline
-            />
-            {!!override && (
-              <TouchableOpacity onPress={() => { setMenuLog(fecha, { [mealKey]: undefined }); setOverride(''); }} style={msh.clearBtn}>
-                <CText variant="label" muted>× Limpiar y usar plan</CText>
-              </TouchableOpacity>
-            )}
-
-            {/* Extras agregados */}
-            {extras.length > 0 && (
-              <>
-                <CText variant="label" muted style={msh.sectionLabel}>ALIMENTOS AGREGADOS</CText>
-                {extras.map((item) => (
-                  <View key={item.id} style={msh.extraRow}>
-                    <View style={{ flex: 1 }}>
-                      <CText variant="body" weight="semi">{item.nombre}</CText>
-                      <CText variant="bodyS" muted>
-                        {item.proteina > 0 ? `${item.proteina} g prot` : ''}
-                        {item.proteina > 0 && item.kcal > 0 ? ' · ' : ''}
-                        {item.kcal > 0 ? `${item.kcal} kcal` : ''}
-                      </CText>
-                    </View>
-                    <TouchableOpacity onPress={() => removeMenuExtra(fecha, item.id)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                      <CText variant="label" style={{ color: Colors.coralDk }}>✕</CText>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                <View style={[msh.extraTotal, { backgroundColor: meta.color }]}>
-                  <CText variant="label" weight="semi">Total extras: {totalExtrasProteina} g prot · {totalExtrasKcal} kcal</CText>
-                </View>
-              </>
-            )}
-
-            {/* Agregar alimento */}
-            <CText variant="label" muted style={msh.sectionLabel}>AGREGAR ALIMENTO</CText>
-            {!addingExtra ? (
-              <TouchableOpacity style={[msh.addBtn, { backgroundColor: meta.color }]} onPress={() => setAddingExtra(true)} activeOpacity={0.8}>
-                <CText variant="label" weight="semi" style={{ color: meta.dk }}>+ Agregar alimento con proteína/calorías</CText>
-              </TouchableOpacity>
-            ) : (
-              <View style={msh.extraForm}>
-                <TextInput
-                  value={extraNombre}
-                  onChangeText={setExtraNombre}
-                  style={msh.input}
-                  placeholder="Nombre del alimento"
-                  placeholderTextColor={Colors.muted}
-                  autoFocus
-                />
-                <View style={{ flexDirection: 'row', gap: Spacing.xs }}>
-                  <TextInput
-                    value={extraProteina}
-                    onChangeText={setExtraProteina}
-                    style={[msh.input, { flex: 1 }]}
-                    placeholder="Proteína (g)"
-                    placeholderTextColor={Colors.muted}
-                    keyboardType="decimal-pad"
-                  />
-                  <TextInput
-                    value={extraKcal}
-                    onChangeText={setExtraKcal}
-                    style={[msh.input, { flex: 1 }]}
-                    placeholder="Calorías (kcal)"
-                    placeholderTextColor={Colors.muted}
-                    keyboardType="decimal-pad"
-                  />
-                </View>
-                <View style={{ flexDirection: 'row', gap: Spacing.xs }}>
-                  <TouchableOpacity style={msh.cancelBtn} onPress={() => setAddingExtra(false)} activeOpacity={0.8}>
-                    <CText variant="label" muted>Cancelar</CText>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[msh.saveBtn, { flex: 1, backgroundColor: meta.dk }]} onPress={agregarExtra} activeOpacity={0.85}>
-                    <CText variant="label" weight="semi" style={{ color: Colors.white }}>Agregar</CText>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {/* Resumen proteína */}
-            {(proteinaPlan > 0 || totalExtrasProteina > 0) && (
-              <View style={[msh.resumenCard, { backgroundColor: Colors.mint }]}>
-                <CText variant="label" style={{ color: Colors.mintDk, letterSpacing: 1 }}>PROTEÍNA ESTIMADA ESTA COMIDA</CText>
-                <CText variant="title" weight="bold" style={{ color: Colors.ink, fontSize: 32 }}>
-                  ~{proteinaPlan + totalExtrasProteina} g
-                </CText>
-                {totalExtrasProteina > 0 && (
-                  <CText variant="bodyS" muted>Plan: {proteinaPlan} g + extras: {totalExtrasProteina} g</CText>
-                )}
-              </View>
-            )}
-          </ScrollView>
-
-          <TouchableOpacity style={msh.closeBtn} onPress={onClose} activeOpacity={0.85}>
-            <CText variant="subtitle" weight="semi" style={{ color: Colors.white }}>Listo</CText>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
-}
-
-const msh = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.32)' },
-  kav: { justifyContent: 'flex-end' },
-  panel: { backgroundColor: Colors.bg, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: Spacing.md, gap: Spacing.sm },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.rule, alignSelf: 'center', marginBottom: Spacing.xs },
-  header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, borderRadius: Radius.cardSm, padding: Spacing.sm },
-  protBadge: { paddingHorizontal: Spacing.sm, paddingVertical: 5, borderRadius: Radius.pill },
-  sectionLabel: { letterSpacing: 1, marginTop: Spacing.sm, marginBottom: 4 },
-  planBox: { borderRadius: Radius.cardSm, padding: Spacing.sm },
-  input: { backgroundColor: Colors.white, borderRadius: Radius.cardSm, paddingHorizontal: Spacing.sm, paddingVertical: 11, fontFamily: 'Outfit_400Regular', fontSize: 14, color: Colors.ink },
-  clearBtn: { alignSelf: 'flex-start', paddingVertical: 4 },
-  addBtn: { borderRadius: Radius.cardSm, padding: Spacing.sm, alignItems: 'center' },
-  extraForm: { gap: Spacing.xs },
-  cancelBtn: { height: 44, paddingHorizontal: Spacing.md, borderRadius: Radius.btn, borderWidth: 1.5, borderColor: Colors.rule, alignItems: 'center', justifyContent: 'center' },
-  saveBtn: { height: 44, borderRadius: Radius.btn, alignItems: 'center', justifyContent: 'center' },
-  extraRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white, borderRadius: Radius.cardSm, padding: Spacing.sm, gap: Spacing.sm },
-  extraTotal: { borderRadius: Radius.cardSm, padding: Spacing.sm, marginTop: 2 },
-  resumenCard: { borderRadius: Radius.card, padding: Spacing.md, gap: 4, marginTop: Spacing.xs },
-  closeBtn: { height: 52, backgroundColor: Colors.ink, borderRadius: Radius.btn, alignItems: 'center', justifyContent: 'center', marginTop: Spacing.xs },
-});
-
 // ── Tarjeta de comida ─────────────────────────────────────────────────────────
 function MealCard({
-  mealKey,
-  menu,
-  menuLog,
-  fecha,
-  style,
+  mealKey, menu, menuLog, fecha, wide,
 }: {
-  mealKey: MealKey;
-  menu: DiaMenu;
-  menuLog: MenuLog;
-  fecha: string;
-  style?: object;
+  mealKey: MealKey; menu: DiaMenu; menuLog: MenuLog; fecha: string; wide?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const meta = MEALS.find((m) => m.key === mealKey)!;
-  const planValue = getMealPlanValue(mealKey, menu);
-  const proteina = getMealProtein(mealKey, menu);
-  const extras = menuLog.extras ?? [];
-  const totalExtrasP = extras.reduce((s, e) => s + e.proteina, 0);
-  const overrideValue = menuLog[mealKey];
-  const hasEdit = !!overrideValue || extras.length > 0;
+  const meta = MEAL_META.find((m) => m.key === mealKey)!;
+  const planText = getPlanText(mealKey, menu);
+  const planProt = getPlanProt(mealKey, menu);
 
-  if (planValue === '—') return null;
+  if (planText === '—') return null;
+
+  const extras = menuLog.extras ?? [];
+  const totalKcal = extras.reduce((s, e) => s + e.kcal, 0);
+  const totalProt = extras.reduce((s, e) => s + e.proteina, 0);
+  const hasLogs = extras.length > 0;
 
   return (
     <>
       <TouchableOpacity
-        style={[mealCardStyle.card, { backgroundColor: meta.color }, style]}
+        style={[mc.card, { backgroundColor: meta.color, width: wide ? '100%' : CARD_W }]}
         onPress={() => setOpen(true)}
         activeOpacity={0.85}
       >
+        {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <CText style={mealCardStyle.label}>{meta.icon} {meta.label.toUpperCase()}</CText>
-          {hasEdit && <View style={mealCardStyle.editedDot} />}
+          <CText style={mc.label}>{meta.icon} {meta.label.toUpperCase()}</CText>
+          {hasLogs && <View style={mc.editedDot} />}
         </View>
-        <CText style={mealCardStyle.name} numberOfLines={3}>
-          {overrideValue ?? planValue}
-        </CText>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          {proteina > 0 && (
-            <View style={[mealCardStyle.protBadge, { backgroundColor: meta.dk + '30' }]}>
-              <CText style={[mealCardStyle.protText, { color: meta.dk }]}>~{proteina + totalExtrasP} g prot</CText>
+
+        {/* Macro summary si hay registros */}
+        {hasLogs ? (
+          <>
+            <View style={mc.macroBar}>
+              <CText style={mc.kcalText}>{Math.round(totalKcal)} kcal</CText>
+              <View style={mc.macroDot} />
+              <CText style={[mc.macroChip, { color: Colors.mintDk }]}>{Math.round(totalProt)}P</CText>
             </View>
-          )}
-          <CText style={mealCardStyle.arrow}>ver más →</CText>
+            {/* Lista corta de alimentos */}
+            {extras.slice(0, wide ? 3 : 2).map((e) => (
+              <View key={e.id} style={mc.foodRow}>
+                <CText style={mc.foodName} numberOfLines={1}>{e.nombre}</CText>
+                <CText style={mc.foodKcal}>{e.kcal} kcal</CText>
+              </View>
+            ))}
+            {extras.length > (wide ? 3 : 2) && (
+              <CText style={mc.more}>+{extras.length - (wide ? 3 : 2)} más…</CText>
+            )}
+          </>
+        ) : (
+          <CText style={mc.planText} numberOfLines={wide ? 3 : 4}>{planText}</CText>
+        )}
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
+          <View style={[mc.protBadge, { backgroundColor: meta.dk + '28' }]}>
+            <CText style={[mc.protText, { color: meta.dk }]}>
+              {hasLogs ? `~${Math.round(totalProt)}g prot` : `~${planProt}g prot`}
+            </CText>
+          </View>
+          <CText style={mc.arrow}>{hasLogs ? 'editar →' : 'registrar →'}</CText>
         </View>
       </TouchableOpacity>
-      <MenuComidaModal
+
+      <MenuComidaSheet
         visible={open}
         mealKey={mealKey}
+        mealLabel={meta.label}
+        mealIcon={meta.icon}
+        mealColor={meta.color}
+        mealDk={meta.dk}
         menu={menu}
         menuLog={menuLog}
         fecha={fecha}
@@ -341,14 +148,24 @@ function MealCard({
   );
 }
 
-const mealCardStyle = StyleSheet.create({
+const CARD_W = (W - Spacing.md * 2 - Spacing.cardGap) / 2;
+
+const mc = StyleSheet.create({
   card: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.xs, ...Shadow.card },
   label: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.65 },
-  name: { fontSize: 15, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, lineHeight: 20 },
+  editedDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: Colors.mintDk },
+  macroBar: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  kcalText: { fontSize: 18, fontFamily: 'Outfit_700Bold', color: Colors.ink },
+  macroDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: Colors.muted },
+  macroChip: { fontSize: 13, fontFamily: 'Outfit_600SemiBold' },
+  foodRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  foodName: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, flex: 1, opacity: 0.8 },
+  foodKcal: { fontSize: 11, fontFamily: 'JetBrainsMono_400Regular', color: Colors.ink, opacity: 0.55 },
+  planText: { fontSize: 13, fontFamily: 'Outfit_400Regular', color: Colors.ink, lineHeight: 18, opacity: 0.8 },
+  more: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
   protBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
   protText: { fontSize: 10, fontFamily: 'Outfit_600SemiBold' },
   arrow: { fontSize: 11, color: Colors.ink, opacity: 0.45, fontFamily: 'Outfit_400Regular' },
-  editedDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: Colors.mintDk },
 });
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -363,9 +180,16 @@ export default function Hoy() {
   const menuLog = menuLogs[fecha] ?? {};
   const entrenoLog = entrenoLogs[fecha];
 
+  // Proteína total del día (del plan + de extras registrados)
   const extras = menuLog.extras ?? [];
   const totalExtrasP = extras.reduce((s, e) => s + e.proteina, 0);
-  const proteinaTotal = menu.proteinaEstimada + totalExtrasP;
+  const totalExtrasKcal = extras.reduce((s, e) => s + e.kcal, 0);
+  const proteinaHoy = menu.proteinaEstimada + Math.round(totalExtrasP) - menu.proteinaEstimada +
+    (extras.length > 0 ? Math.round(totalExtrasP) : menu.proteinaEstimada);
+
+  // Kcal solo si hay registros
+  const kcalHoy = totalExtrasKcal;
+  const hasAnyLog = extras.length > 0;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -400,22 +224,34 @@ export default function Hoy() {
           <ProgressRing progress={progress} />
         </View>
 
-        {/* Proteína del día */}
-        <View style={[styles.proteinaHero, { backgroundColor: Colors.mint }]}>
+        {/* Proteína + kcal del día */}
+        <View style={[styles.protCard, { backgroundColor: Colors.mint }]}>
           <View style={{ flex: 1 }}>
-            <CText variant="label" style={{ color: Colors.mintDk, letterSpacing: 1 }}>PROTEÍNA HOY · {menu.dia.toUpperCase()}</CText>
-            <CText style={{ fontSize: 30, fontFamily: 'Outfit_800ExtraBold', color: Colors.ink }}>~{proteinaTotal} g</CText>
-            <CText variant="bodyS" muted>Meta: ≥ 90 g · {proteinaTotal >= 90 ? '✓ en camino' : `faltan ~${90 - proteinaTotal} g`}</CText>
-          </View>
-          <View style={styles.proteinaMeta}>
-            <View style={[styles.proteinaBar, { height: 6, backgroundColor: 'rgba(26,26,46,0.12)', borderRadius: 3, overflow: 'hidden' }]}>
-              <View style={{ width: `${Math.min((proteinaTotal / 100) * 100, 100)}%` as any, height: 6, backgroundColor: Colors.mintDk, borderRadius: 3 }} />
+            <CText style={styles.protLabel}>NUTRICIÓN HOY</CText>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+              <CText style={styles.protAmt}>
+                {hasAnyLog ? `~${Math.round(totalExtrasP)}` : `~${menu.proteinaEstimada}`}
+              </CText>
+              <CText style={styles.protUnit}>g proteína</CText>
             </View>
-            <CText variant="label" style={{ color: Colors.mintDk }}>/{menu.proteinaEstimada + 'g plan'}</CText>
+            {hasAnyLog && (
+              <CText style={styles.protKcal}>{Math.round(kcalHoy)} kcal registradas</CText>
+            )}
+            <CText style={styles.protMeta}>
+              Meta: ≥ 90 g · {(hasAnyLog ? Math.round(totalExtrasP) : menu.proteinaEstimada) >= 90 ? '✓ en camino' : `faltan ~${90 - (hasAnyLog ? Math.round(totalExtrasP) : menu.proteinaEstimada)} g`}
+            </CText>
+          </View>
+          <View style={styles.protBarWrap}>
+            <View style={styles.protBarTrack}>
+              <View style={[styles.protBarFill, {
+                height: `${Math.min(((hasAnyLog ? Math.round(totalExtrasP) : menu.proteinaEstimada) / 100) * 100, 100)}%` as any,
+              }]} />
+            </View>
+            <CText style={{ fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', color: Colors.mintDk, marginTop: 3 }}>100g</CText>
           </View>
         </View>
 
-        {/* Entreno card */}
+        {/* Entreno */}
         <TouchableOpacity
           style={[styles.entrenoCard, { backgroundColor: (entrenoLog?.hecho ?? workoutDone) ? Colors.lime : Colors.sky }]}
           onPress={toggleWorkout}
@@ -424,7 +260,7 @@ export default function Hoy() {
           <View style={{ flex: 1 }}>
             <CText style={styles.entrenoLabel}>ENTRENO {entreno.icon}</CText>
             <CText style={styles.entrenoName}>{entrenoLog?.sesionReal ?? entreno.sesion}</CText>
-            <CText style={styles.entrenoDuracion}>{entreno.duracion}</CText>
+            <CText style={styles.entrenoDur}>{entreno.duracion}</CText>
           </View>
           <View style={{ alignItems: 'flex-end', gap: 6 }}>
             {entreno.horario !== 'Libre' && (
@@ -435,49 +271,38 @@ export default function Hoy() {
               </View>
             )}
             <View style={[styles.hechoTag, { backgroundColor: (entrenoLog?.hecho ?? workoutDone) ? Colors.mintDk : Colors.white }]}>
-              <CText style={[styles.hechoTagText, { color: (entrenoLog?.hecho ?? workoutDone) ? Colors.white : Colors.ink }]}>
+              <CText style={[styles.hechoText, { color: (entrenoLog?.hecho ?? workoutDone) ? Colors.white : Colors.ink }]}>
                 {(entrenoLog?.hecho ?? workoutDone) ? '✓ Hecho' : 'Marcar hecho'}
               </CText>
             </View>
           </View>
         </TouchableOpacity>
 
-        {/* Comidas — grid */}
-        <CText variant="label" muted style={{ letterSpacing: 1 }}>MENÚ DE HOY</CText>
+        {/* Comidas */}
+        <CText variant="label" muted style={{ letterSpacing: 1 }}>MENÚ DE HOY · {menu.dia.toUpperCase()}</CText>
 
         {/* Desayuno — ancho completo */}
-        <MealCard mealKey="desayuno" menu={menu} menuLog={menuLog} fecha={fecha} />
+        <MealCard mealKey="desayuno" menu={menu} menuLog={menuLog} fecha={fecha} wide />
 
         {/* Grid 2 columnas */}
         <View style={styles.grid}>
-          {(['preEntreno', 'mediaManana', 'almuerzo', 'snackTarde', 'cena'] as MealKey[]).map((key) => {
-            const planVal = getMealPlanValue(key, menu);
-            if (planVal === '—') return null;
-            return (
-              <MealCard
-                key={key}
-                mealKey={key}
-                menu={menu}
-                menuLog={menuLog}
-                fecha={fecha}
-                style={{ width: CARD_W }}
-              />
-            );
-          })}
+          {(['preEntreno', 'mediaManana', 'almuerzo', 'snackTarde', 'cena'] as MealKey[]).map((key) => (
+            <MealCard key={key} mealKey={key} menu={menu} menuLog={menuLog} fecha={fecha} />
+          ))}
         </View>
 
-        {/* Stats */}
+        {/* Estadísticas */}
         <View style={[styles.statsCard, Shadow.card]}>
           <CText style={styles.statsTitle}>Estadísticas del día</CText>
           <View style={styles.statsRow}>
             {[
               { label: 'Pasos', val: '7,420', color: Colors.mint },
-              { label: 'Agua',  val: '2.1L',  color: Colors.sky },
+              { label: 'Agua',  val: '2.1 L', color: Colors.sky },
               { label: 'Sueño', val: '6h48',  color: Colors.lavender },
             ].map((s) => (
               <View key={s.label} style={styles.statItem}>
                 <View style={[styles.statIcon, { backgroundColor: s.color }]}>
-                  <CText style={styles.statIconText}>◐</CText>
+                  <CText style={styles.statIconTxt}>◐</CText>
                 </View>
                 <CText style={styles.statVal}>{s.val}</CText>
                 <CText style={styles.statLabel}>{s.label}</CText>
@@ -487,12 +312,12 @@ export default function Hoy() {
         </View>
 
         {/* Manager */}
-        <View style={[styles.managerCard, { backgroundColor: Colors.ink }]}>
-          <CText style={styles.managerEyebrow}>EL MANAGER</CText>
+        <View style={[styles.managerCard]}>
+          <CText style={styles.managerEye}>EL MANAGER</CText>
           <CText style={styles.managerMsg}>
             {(entrenoLog?.hecho ?? workoutDone)
-              ? `"${entrenoLog?.sesionReal ?? entreno.sesion} ✓ · ~${proteinaTotal}g proteína hoy${proteinaTotal >= 90 ? '. Día completo.' : '. Apunta a 90 g.'}"`
-              : `"Hoy: ${entreno.sesion}${entreno.horario !== 'Libre' ? ` a las ${entreno.horario}` : ''}. Meta: ≥90 g proteína. ${entreno.notasNutricion}"`
+              ? `"${entrenoLog?.sesionReal ?? entreno.sesion} ✓ · ${hasAnyLog ? `${Math.round(totalExtrasP)}g` : `~${menu.proteinaEstimada}g`} proteína hoy."`
+              : `"Hoy: ${entreno.sesion}${entreno.horario !== 'Libre' ? ` a las ${entreno.horario}` : ''}. Meta ≥ 90 g proteína. ${entreno.notasNutricion}"`
             }
           </CText>
         </View>
@@ -501,8 +326,6 @@ export default function Hoy() {
     </SafeAreaView>
   );
 }
-
-const CARD_W = (W - Spacing.md * 2 - Spacing.cardGap) / 2;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg },
@@ -522,17 +345,23 @@ const styles = StyleSheet.create({
   heroTrack: { height: 6, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 3, marginTop: 4, overflow: 'hidden' },
   heroFill: { height: 6, borderRadius: 3 },
 
-  proteinaHero: { borderRadius: Radius.card, padding: Spacing.md, ...Shadow.card, gap: Spacing.xs },
-  proteinaMeta: { gap: 4 },
-  proteinaBar: {},
+  protCard: { borderRadius: Radius.card, padding: Spacing.md, ...Shadow.card, flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  protLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6, marginBottom: 4 },
+  protAmt: { fontSize: 36, fontFamily: 'Outfit_800ExtraBold', color: Colors.ink },
+  protUnit: { fontSize: 14, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.7 },
+  protKcal: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.mintDk, marginTop: 2 },
+  protMeta: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 4 },
+  protBarWrap: { alignItems: 'center', gap: 3 },
+  protBarTrack: { width: 8, height: 70, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 4, overflow: 'hidden', justifyContent: 'flex-end' },
+  protBarFill: { width: 8, backgroundColor: Colors.mintDk, borderRadius: 4 },
 
   entrenoCard: { borderRadius: Radius.card, padding: Spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', ...Shadow.card },
   entrenoLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
   entrenoName: { fontSize: 17, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, marginTop: 4 },
-  entrenoDuracion: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 2 },
+  entrenoDur: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 2 },
   horarioBadge: { backgroundColor: 'rgba(123,190,240,0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
   hechoTag: { paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.pill, borderWidth: 1.5, borderColor: Colors.mintDk },
-  hechoTagText: { fontSize: 11, fontFamily: 'Outfit_600SemiBold' },
+  hechoText: { fontSize: 11, fontFamily: 'Outfit_600SemiBold' },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.cardGap },
 
@@ -541,11 +370,11 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   statItem: { alignItems: 'center', gap: 6 },
   statIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  statIconText: { fontSize: 18 },
+  statIconTxt: { fontSize: 18 },
   statVal: { fontSize: 16, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
   statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
 
-  managerCard: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm },
-  managerEyebrow: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' },
+  managerCard: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm, backgroundColor: Colors.ink },
+  managerEye: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' },
   managerMsg: { fontSize: 15, fontFamily: 'Outfit_400Regular', fontStyle: 'italic', color: Colors.white, lineHeight: 24 },
 });
