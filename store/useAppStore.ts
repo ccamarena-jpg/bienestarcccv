@@ -137,21 +137,19 @@ export const useAppStore = create<AppState>()(
 
       entrenoLogs: {},
       setEntrenoLog: (fecha, log) =>
-        set((s) => ({
-          entrenoLogs: {
-            ...s.entrenoLogs,
-            [fecha]: { ...s.entrenoLogs[fecha], ...log },
-          },
-        })),
+        set((s) => {
+          const updated = { ...s.entrenoLogs[fecha], ...log };
+          SheetsService.setEntrenoLog(fecha, updated).catch(() => {});
+          return { entrenoLogs: { ...s.entrenoLogs, [fecha]: updated } };
+        }),
 
       menuLogs: {},
       setMenuLog: (fecha, log) =>
-        set((s) => ({
-          menuLogs: {
-            ...s.menuLogs,
-            [fecha]: { ...s.menuLogs[fecha], ...log },
-          },
-        })),
+        set((s) => {
+          const updated = { ...s.menuLogs[fecha], ...log };
+          SheetsService.setMenuLog(fecha, updated).catch(() => {});
+          return { menuLogs: { ...s.menuLogs, [fecha]: updated } };
+        }),
 
       addMenuExtra: (fecha, item) =>
         set((s) => {
@@ -160,14 +158,18 @@ export const useAppStore = create<AppState>()(
             ...(existing.extras ?? []),
             { ...item, id: Date.now().toString() },
           ];
-          return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+          const updated = { ...existing, extras };
+          SheetsService.setMenuLog(fecha, updated).catch(() => {});
+          return { menuLogs: { ...s.menuLogs, [fecha]: updated } };
         }),
 
       removeMenuExtra: (fecha, itemId) =>
         set((s) => {
           const existing = s.menuLogs[fecha] ?? {};
           const extras = (existing.extras ?? []).filter((e) => e.id !== itemId);
-          return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+          const updated = { ...existing, extras };
+          SheetsService.setMenuLog(fecha, updated).catch(() => {});
+          return { menuLogs: { ...s.menuLogs, [fecha]: updated } };
         }),
     }),
     {

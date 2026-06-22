@@ -1,4 +1,6 @@
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwtTK7-3q5Z7SZYdnStuKqcJXWashQGDtTNXQyNichLQj44B3ae5OerTtb-78K0NFMo/exec';
+import { EntrenoLog, MenuLog, CustomFoodItem } from '../store/useAppStore';
+
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby6QXHiLayqV84ch2kWcWWzhStTJFX9_cEAu5o_fUapxtKZyUI1Ji_bviut3nd7mp07/exec';
 
 async function call(params: Record<string, string>): Promise<any> {
   const qs = new URLSearchParams(params).toString();
@@ -46,4 +48,41 @@ export async function getConfig(): Promise<Record<string, string>> {
 export async function setOutfit(desc: string): Promise<void> {
   const fecha = new Date().toISOString().split('T')[0];
   await call({ action: 'setOutfit', fecha, desc });
+}
+
+export async function setEntrenoLog(fecha: string, log: EntrenoLog): Promise<void> {
+  await call({
+    action: 'setEntrenoLog',
+    fecha,
+    hecho: String(log.hecho),
+    sesionReal: log.sesionReal ?? '',
+    horaReal: log.horaReal ?? '',
+    rpe: String(log.rpe ?? ''),
+    notas: log.notas ?? '',
+  });
+}
+
+export async function setMenuLog(fecha: string, log: MenuLog): Promise<void> {
+  const { extras, ...comidas } = log;
+  await call({
+    action: 'setMenuLog',
+    fecha,
+    preEntreno: comidas.preEntreno ?? '',
+    desayuno: comidas.desayuno ?? '',
+    mediaManana: comidas.mediaManana ?? '',
+    almuerzo: comidas.almuerzo ?? '',
+    snackTarde: comidas.snackTarde ?? '',
+    cena: comidas.cena ?? '',
+    extras: extras ? JSON.stringify(extras) : '[]',
+  });
+}
+
+export async function getEntrenoLogs(): Promise<Record<string, EntrenoLog>> {
+  const res = await call({ action: 'getEntrenoLogs' });
+  return res.data ?? {};
+}
+
+export async function getMenuLogs(): Promise<Record<string, MenuLog>> {
+  const res = await call({ action: 'getMenuLogs' });
+  return res.data ?? {};
 }
