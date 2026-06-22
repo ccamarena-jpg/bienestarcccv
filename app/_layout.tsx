@@ -13,6 +13,7 @@ import {
   JetBrainsMono_600SemiBold,
 } from '@expo-google-fonts/jetbrains-mono';
 import { View, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
 import { Colors } from '../constants/tokens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -27,8 +28,16 @@ export default function RootLayout() {
     JetBrainsMono_400Regular,
     JetBrainsMono_600SemiBold,
   });
+  const [timedOut, setTimedOut] = useState(false);
 
-  if (!fontsLoaded || !monoLoaded) {
+  useEffect(() => {
+    const t = setTimeout(() => setTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const ready = fontsLoaded && monoLoaded;
+
+  if (!ready && !timedOut) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator color={Colors.lavenderDk} />
