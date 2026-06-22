@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.cardSm,
     backgroundColor: Colors.bg,
     paddingHorizontal: Spacing.sm,
-    fontFamily: 'Outfit_400Regular',
+    fontFamily: 'Quicksand_400Regular',
     fontSize: 15,
     color: Colors.ink,
   },

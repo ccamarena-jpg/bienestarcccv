@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View, ScrollView, StyleSheet, TouchableOpacity,
   Modal, TextInput, KeyboardAvoidingView, Platform,
@@ -203,7 +203,7 @@ const sheet = StyleSheet.create({
   input: {
     backgroundColor: Colors.white, borderRadius: Radius.cardSm,
     paddingHorizontal: Spacing.sm, paddingVertical: 12,
-    fontFamily: 'Outfit_400Regular', fontSize: 15, color: Colors.ink,
+    fontFamily: 'Quicksand_400Regular', fontSize: 15, color: Colors.ink,
   },
   rpeRow: { flexDirection: 'row', gap: 4, marginBottom: Spacing.xs, flexWrap: 'wrap' },
   rpeBtn: {

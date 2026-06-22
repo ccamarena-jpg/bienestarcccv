@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, PanResponder, Dimensions, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   budgetNum: {
     fontSize: 64,
-    fontFamily: 'Outfit_800ExtraBold',
+    fontFamily: 'Quicksand_700Bold',
     color: Colors.ink,
     lineHeight: 72,
   },

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Text, TextProps } from 'react-native';
 import { Colors } from '../../constants/tokens';
 
@@ -23,11 +23,11 @@ const SIZES: Record<string, number> = {
 
 const FAMILIES: Record<string, Record<string, string>> = {
   regular: {
-    display:  'Outfit_700Bold',
-    title:    'Outfit_700Bold',
-    subtitle: 'Outfit_600SemiBold',
-    body:     'Outfit_400Regular',
-    bodyS:    'Outfit_400Regular',
+    display:  'Quicksand_700Bold',
+    title:    'Quicksand_700Bold',
+    subtitle: 'Quicksand_600SemiBold',
+    body:     'Quicksand_400Regular',
+    bodyS:    'Quicksand_400Regular',
     label:    'JetBrainsMono_400Regular',
     mono:     'JetBrainsMono_400Regular',
   },
@@ -46,14 +46,14 @@ export function CText({
   const size = SIZES[variant] ?? 15;
 
   const fontMap: Record<string, string> = {
-    regular: 'Outfit_400Regular',
-    medium:  'Outfit_500Medium',
-    semi:    'Outfit_600SemiBold',
-    bold:    'Outfit_700Bold',
-    extra:   'Outfit_800ExtraBold',
+    regular: 'Quicksand_400Regular',
+    medium:  'Quicksand_500Medium',
+    semi:    'Quicksand_600SemiBold',
+    bold:    'Quicksand_700Bold',
+    extra:   'Quicksand_700Bold',
   };
 
-  let fontFamily = FAMILIES.regular[variant] ?? 'Outfit_400Regular';
+  let fontFamily = FAMILIES.regular[variant] ?? 'Quicksand_400Regular';
   if (weight) fontFamily = fontMap[weight];
   if (variant === 'label' || variant === 'mono') fontFamily = 'JetBrainsMono_400Regular';
 

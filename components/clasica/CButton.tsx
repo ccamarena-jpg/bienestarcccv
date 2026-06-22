@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { TouchableOpacity, ViewStyle, StyleSheet } from 'react-native';
 import { Colors, Spacing, Radius } from '../../constants/tokens';
 import { CText } from './CText';
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   ghost:   { backgroundColor: 'transparent' },
   label: {
     fontSize: 14,
-    fontFamily: 'Outfit_600SemiBold',
+    fontFamily: 'Quicksand_600SemiBold',
     letterSpacing: 0.3,
   },
 });

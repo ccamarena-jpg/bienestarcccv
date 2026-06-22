@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View, Modal, TouchableOpacity, TextInput,
   ScrollView, StyleSheet, KeyboardAvoidingView, Platform,
@@ -41,7 +41,7 @@ function MacroBadge({ label, value, unit, color }: { label: string; value: numbe
 }
 const mb = StyleSheet.create({
   pill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: Radius.pill, alignItems: 'center' },
-  val: { fontSize: 16, fontFamily: 'Outfit_700Bold', color: Colors.ink },
+  val: { fontSize: 16, fontFamily: 'Quicksand_700Bold', color: Colors.ink },
   unit: { fontSize: 9, fontFamily: 'JetBrainsMono_400Regular', color: Colors.ink, opacity: 0.65, letterSpacing: 0.5 },
 });
 
@@ -58,7 +58,7 @@ function LoggedRow({ item, onRemove }: { item: CustomFoodItem; onRemove: () => v
         <CText style={lr.prot}>{item.proteina}P</CText>
       </View>
       <TouchableOpacity onPress={onRemove} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-        <CText style={{ color: Colors.coralDk, fontSize: 14, fontFamily: 'Outfit_600SemiBold' }}>✕</CText>
+        <CText style={{ color: Colors.coralDk, fontSize: 14, fontFamily: 'Quicksand_600SemiBold' }}>✕</CText>
       </TouchableOpacity>
     </View>
   );
@@ -66,7 +66,7 @@ function LoggedRow({ item, onRemove }: { item: CustomFoodItem; onRemove: () => v
 const lr = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.rule },
   macros: { alignItems: 'flex-end', gap: 2 },
-  kcal: { fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  kcal: { fontSize: 12, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
   prot: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', color: Colors.mintDk },
 });
 
@@ -94,7 +94,7 @@ function SearchRow({
 }
 const sr = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.rule },
-  kcal: { fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  kcal: { fontSize: 12, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
   prot: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', color: Colors.mintDk },
 });
 
@@ -165,7 +165,7 @@ const cp = StyleSheet.create({
   container: { gap: Spacing.sm, padding: Spacing.md, backgroundColor: Colors.white, borderRadius: Radius.card, ...Shadow.card },
   cantRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   cantBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.pill, backgroundColor: Colors.bg },
-  cantTxt: { fontSize: 12, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  cantTxt: { fontSize: 12, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
   macroBox: { borderRadius: Radius.cardSm, padding: Spacing.sm, gap: 2 },
   cancelBtn: { height: 44, paddingHorizontal: Spacing.md, borderRadius: Radius.btn, borderWidth: 1.5, borderColor: Colors.rule, alignItems: 'center', justifyContent: 'center' },
   confirmBtn: { height: 44, backgroundColor: Colors.ink, borderRadius: Radius.btn, alignItems: 'center', justifyContent: 'center' },
@@ -376,5 +376,5 @@ const s = StyleSheet.create({
   addBtn: { height: 46, borderRadius: Radius.btn, alignItems: 'center', justifyContent: 'center', marginVertical: Spacing.xs },
   emptyBox: { borderRadius: Radius.cardSm, padding: Spacing.md, alignItems: 'center', marginTop: Spacing.xs },
   searchBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, backgroundColor: Colors.white, borderRadius: Radius.cardSm, paddingHorizontal: Spacing.sm, paddingVertical: 10, marginBottom: Spacing.xs },
-  searchInput: { flex: 1, fontFamily: 'Outfit_400Regular', fontSize: 15, color: Colors.ink },
+  searchInput: { flex: 1, fontFamily: 'Quicksand_400Regular', fontSize: 15, color: Colors.ink },
 });

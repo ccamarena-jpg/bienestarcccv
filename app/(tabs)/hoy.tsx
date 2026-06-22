@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -36,7 +36,7 @@ function ProgressRing({ progress, size = 90 }: { progress: number; size?: number
         borderLeftColor:   clamped < 0.75 ? 'transparent' : Colors.white,
         transform: [{ rotate: '-90deg' }],
       }} />
-      <CText style={{ fontSize: 20, fontFamily: 'Outfit_600SemiBold', color: Colors.white }}>
+      <CText style={{ fontSize: 20, fontFamily: 'Quicksand_600SemiBold', color: Colors.white }}>
         {Math.round(clamped * 100)}%
       </CText>
     </View>
@@ -155,17 +155,17 @@ const mc = StyleSheet.create({
   label: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.65 },
   editedDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: Colors.mintDk },
   macroBar: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  kcalText: { fontSize: 18, fontFamily: 'Outfit_700Bold', color: Colors.ink },
+  kcalText: { fontSize: 18, fontFamily: 'Quicksand_700Bold', color: Colors.ink },
   macroDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: Colors.muted },
-  macroChip: { fontSize: 13, fontFamily: 'Outfit_600SemiBold' },
+  macroChip: { fontSize: 13, fontFamily: 'Quicksand_600SemiBold' },
   foodRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  foodName: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, flex: 1, opacity: 0.8 },
+  foodName: { fontSize: 12, fontFamily: 'Quicksand_400Regular', color: Colors.ink, flex: 1, opacity: 0.8 },
   foodKcal: { fontSize: 11, fontFamily: 'JetBrainsMono_400Regular', color: Colors.ink, opacity: 0.55 },
-  planText: { fontSize: 13, fontFamily: 'Outfit_400Regular', color: Colors.ink, lineHeight: 18, opacity: 0.8 },
-  more: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
+  planText: { fontSize: 13, fontFamily: 'Quicksand_400Regular', color: Colors.ink, lineHeight: 18, opacity: 0.8 },
+  more: { fontSize: 11, color: Colors.muted, fontFamily: 'Quicksand_400Regular' },
   protBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
-  protText: { fontSize: 10, fontFamily: 'Outfit_600SemiBold' },
-  arrow: { fontSize: 11, color: Colors.ink, opacity: 0.45, fontFamily: 'Outfit_400Regular' },
+  protText: { fontSize: 10, fontFamily: 'Quicksand_600SemiBold' },
+  arrow: { fontSize: 11, color: Colors.ink, opacity: 0.45, fontFamily: 'Quicksand_400Regular' },
 });
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -333,48 +333,48 @@ const styles = StyleSheet.create({
 
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   dateSmall: { fontSize: 12, color: Colors.muted, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 0.5 },
-  greeting: { fontSize: 24, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, marginTop: 2 },
+  greeting: { fontSize: 24, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink, marginTop: 2 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.ink, alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { fontSize: 18, color: Colors.white, fontFamily: 'Outfit_600SemiBold' },
+  avatarLetter: { fontSize: 18, color: Colors.white, fontFamily: 'Quicksand_600SemiBold' },
 
   heroCard: { borderRadius: Radius.card, padding: Spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', ...Shadow.card },
   heroLeft: { flex: 1, gap: 6 },
   heroLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
-  heroAmt: { fontSize: 36, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
-  heroSub: { fontSize: 12, color: Colors.ink, opacity: 0.6, fontFamily: 'Outfit_400Regular' },
+  heroAmt: { fontSize: 36, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
+  heroSub: { fontSize: 12, color: Colors.ink, opacity: 0.6, fontFamily: 'Quicksand_400Regular' },
   heroTrack: { height: 6, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 3, marginTop: 4, overflow: 'hidden' },
   heroFill: { height: 6, borderRadius: 3 },
 
   protCard: { borderRadius: Radius.card, padding: Spacing.md, ...Shadow.card, flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   protLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6, marginBottom: 4 },
-  protAmt: { fontSize: 36, fontFamily: 'Outfit_800ExtraBold', color: Colors.ink },
-  protUnit: { fontSize: 14, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.7 },
-  protKcal: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.mintDk, marginTop: 2 },
-  protMeta: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 4 },
+  protAmt: { fontSize: 36, fontFamily: 'Quicksand_700Bold', color: Colors.ink },
+  protUnit: { fontSize: 14, fontFamily: 'Quicksand_400Regular', color: Colors.ink, opacity: 0.7 },
+  protKcal: { fontSize: 12, fontFamily: 'Quicksand_400Regular', color: Colors.mintDk, marginTop: 2 },
+  protMeta: { fontSize: 12, fontFamily: 'Quicksand_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 4 },
   protBarWrap: { alignItems: 'center', gap: 3 },
   protBarTrack: { width: 8, height: 70, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 4, overflow: 'hidden', justifyContent: 'flex-end' },
   protBarFill: { width: 8, backgroundColor: Colors.mintDk, borderRadius: 4 },
 
   entrenoCard: { borderRadius: Radius.card, padding: Spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', ...Shadow.card },
   entrenoLabel: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: Colors.ink, opacity: 0.6 },
-  entrenoName: { fontSize: 17, fontFamily: 'Outfit_600SemiBold', color: Colors.ink, marginTop: 4 },
-  entrenoDur: { fontSize: 12, fontFamily: 'Outfit_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 2 },
+  entrenoName: { fontSize: 17, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink, marginTop: 4 },
+  entrenoDur: { fontSize: 12, fontFamily: 'Quicksand_400Regular', color: Colors.ink, opacity: 0.6, marginTop: 2 },
   horarioBadge: { backgroundColor: 'rgba(123,190,240,0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill },
   hechoTag: { paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.pill, borderWidth: 1.5, borderColor: Colors.mintDk },
-  hechoText: { fontSize: 11, fontFamily: 'Outfit_600SemiBold' },
+  hechoText: { fontSize: 11, fontFamily: 'Quicksand_600SemiBold' },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.cardGap },
 
   statsCard: { backgroundColor: Colors.white, borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm },
-  statsTitle: { fontSize: 15, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
+  statsTitle: { fontSize: 15, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
   statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   statItem: { alignItems: 'center', gap: 6 },
   statIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   statIconTxt: { fontSize: 18 },
-  statVal: { fontSize: 16, fontFamily: 'Outfit_600SemiBold', color: Colors.ink },
-  statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'Outfit_400Regular' },
+  statVal: { fontSize: 16, fontFamily: 'Quicksand_600SemiBold', color: Colors.ink },
+  statLabel: { fontSize: 11, color: Colors.muted, fontFamily: 'Quicksand_400Regular' },
 
   managerCard: { borderRadius: Radius.card, padding: Spacing.md, gap: Spacing.sm, backgroundColor: Colors.ink },
   managerEye: { fontSize: 10, fontFamily: 'JetBrainsMono_400Regular', letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' },
-  managerMsg: { fontSize: 15, fontFamily: 'Outfit_400Regular', fontStyle: 'italic', color: Colors.white, lineHeight: 24 },
+  managerMsg: { fontSize: 15, fontFamily: 'Quicksand_400Regular', fontStyle: 'italic', color: Colors.white, lineHeight: 24 },
 });

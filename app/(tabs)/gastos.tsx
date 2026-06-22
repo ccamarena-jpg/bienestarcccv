@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   ScrollView,
@@ -134,7 +134,7 @@ function QuickAddModal({ visible, onClose }: { visible: boolean; onClose: () => 
 
           <CText variant="label" muted style={{ letterSpacing: 1, marginBottom: 4 }}>MONTO</CText>
           <View style={modalStyles.amountRow}>
-            <CText style={{ fontSize: 28, fontFamily: 'Outfit_700Bold', color: Colors.mintDk }}>S/</CText>
+            <CText style={{ fontSize: 28, fontFamily: 'Quicksand_700Bold', color: Colors.mintDk }}>S/</CText>
             <TextInput
               value={amount}
               onChangeText={setAmount}
@@ -197,7 +197,7 @@ const modalStyles = StyleSheet.create({
   amountInput: {
     flex: 1,
     fontSize: 36,
-    fontFamily: 'Outfit_700Bold',
+    fontFamily: 'Quicksand_700Bold',
     color: Colors.ink,
     paddingVertical: 4,
   },
@@ -206,7 +206,7 @@ const modalStyles = StyleSheet.create({
     borderRadius: Radius.cardSm,
     backgroundColor: Colors.white,
     paddingHorizontal: Spacing.sm,
-    fontFamily: 'Outfit_400Regular',
+    fontFamily: 'Quicksand_400Regular',
     fontSize: 14,
     color: Colors.ink,
   },
@@ -309,7 +309,7 @@ const chatStyles = StyleSheet.create({
     height: 44,
     paddingHorizontal: Spacing.sm,
     borderRadius: Radius.pill,
-    fontFamily: 'Outfit_400Regular',
+    fontFamily: 'Quicksand_400Regular',
     fontSize: 14,
     color: Colors.ink,
     backgroundColor: Colors.white,
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     ...Shadow.card,
   },
-  heroNum: { fontSize: 56, fontFamily: 'Outfit_800ExtraBold', color: Colors.ink, lineHeight: 64 },
+  heroNum: { fontSize: 56, fontFamily: 'Quicksand_700Bold', color: Colors.ink, lineHeight: 64 },
   progressBg: {
     height: 8,
     backgroundColor: 'rgba(26,26,46,0.1)',

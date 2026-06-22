@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SheetsService from '../services/sheets';
 
 export type ExpenseCategory = 'Alim.' | 'Salud' | 'Ocio' | 'Trans.' | 'Hogar' | 'Otro';
@@ -79,90 +81,111 @@ interface AppState {
   removeMenuExtra: (fecha: string, itemId: string) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
-  userName: 'Claudia',
-  setUserName: (name) => {
-    set({ userName: name });
-    SheetsService.setConfig('nombre', name).catch(() => {});
-  },
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      userName: 'Claudia',
+      setUserName: (name) => {
+        set({ userName: name });
+        SheetsService.setConfig('nombre', name).catch(() => {});
+      },
 
-  onboardingDone: true,
-  setOnboardingDone: (v) => set({ onboardingDone: v }),
+      onboardingDone: true,
+      setOnboardingDone: (v) => set({ onboardingDone: v }),
 
-  goals: [],
-  toggleGoal: (goal) => {
-    const { goals } = get();
-    if (goals.includes(goal)) {
-      set({ goals: goals.filter((g) => g !== goal) });
-    } else if (goals.length < 2) {
-      set({ goals: [...goals, goal] });
+      goals: [],
+      toggleGoal: (goal) => {
+        const { goals } = get();
+        if (goals.includes(goal)) {
+          set({ goals: goals.filter((g) => g !== goal) });
+        } else if (goals.length < 2) {
+          set({ goals: [...goals, goal] });
+        }
+      },
+
+      budget: 80,
+      setBudget: (n) => {
+        set({ budget: n });
+        SheetsService.setConfig('presupuesto', String(n)).catch(() => {});
+      },
+
+      expenses: [],
+      addExpense: (e) => {
+        const newExpense: Expense = { ...e, id: Date.now().toString() };
+        set((s) => ({ expenses: [newExpense, ...s.expenses], spent: s.spent + e.amt }));
+        SheetsService.addGasto(e).catch(() => {});
+      },
+      clearExpenses: () => set({ expenses: [], spent: 0 }),
+      spent: 0,
+
+      workoutDone: false,
+      toggleWorkout: () => {
+        const next = !get().workoutDone;
+        set({ workoutDone: next });
+        SheetsService.setWorkout(next).catch(() => {});
+      },
+
+      outfitImg: null,
+      setOutfitImg: (url) => set({ outfitImg: url }),
+
+      sheetsConnected: false,
+      setSheetsConnected: (v) => set({ sheetsConnected: v }),
+
+      selectedRecipes: { desayuno: null, almuerzo: null, cena: null, snack: null },
+      selectRecipe: (categoria, recetaId) =>
+        set((s) => ({ selectedRecipes: { ...s.selectedRecipes, [categoria]: recetaId } })),
+
+      entrenoLogs: {},
+      setEntrenoLog: (fecha, log) =>
+        set((s) => ({
+          entrenoLogs: {
+            ...s.entrenoLogs,
+            [fecha]: { ...s.entrenoLogs[fecha], ...log },
+          },
+        })),
+
+      menuLogs: {},
+      setMenuLog: (fecha, log) =>
+        set((s) => ({
+          menuLogs: {
+            ...s.menuLogs,
+            [fecha]: { ...s.menuLogs[fecha], ...log },
+          },
+        })),
+
+      addMenuExtra: (fecha, item) =>
+        set((s) => {
+          const existing = s.menuLogs[fecha] ?? {};
+          const extras = [
+            ...(existing.extras ?? []),
+            { ...item, id: Date.now().toString() },
+          ];
+          return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+        }),
+
+      removeMenuExtra: (fecha, itemId) =>
+        set((s) => {
+          const existing = s.menuLogs[fecha] ?? {};
+          const extras = (existing.extras ?? []).filter((e) => e.id !== itemId);
+          return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
+        }),
+    }),
+    {
+      name: 'bitacora-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        userName: state.userName,
+        onboardingDone: state.onboardingDone,
+        goals: state.goals,
+        budget: state.budget,
+        expenses: state.expenses,
+        spent: state.spent,
+        outfitImg: state.outfitImg,
+        sheetsConnected: state.sheetsConnected,
+        selectedRecipes: state.selectedRecipes,
+        entrenoLogs: state.entrenoLogs,
+        menuLogs: state.menuLogs,
+      }),
     }
-  },
-
-  budget: 80,
-  setBudget: (n) => {
-    set({ budget: n });
-    SheetsService.setConfig('presupuesto', String(n)).catch(() => {});
-  },
-
-  expenses: [],
-  addExpense: (e) => {
-    const newExpense: Expense = { ...e, id: Date.now().toString() };
-    set((s) => ({ expenses: [newExpense, ...s.expenses], spent: s.spent + e.amt }));
-    SheetsService.addGasto(e).catch(() => {});
-  },
-  clearExpenses: () => set({ expenses: [], spent: 0 }),
-  spent: 0,
-
-  workoutDone: false,
-  toggleWorkout: () => {
-    const next = !get().workoutDone;
-    set({ workoutDone: next });
-    SheetsService.setWorkout(next).catch(() => {});
-  },
-
-  outfitImg: null,
-  setOutfitImg: (url) => set({ outfitImg: url }),
-
-  sheetsConnected: false,
-  setSheetsConnected: (v) => set({ sheetsConnected: v }),
-
-  selectedRecipes: { desayuno: null, almuerzo: null, cena: null, snack: null },
-  selectRecipe: (categoria, recetaId) =>
-    set((s) => ({ selectedRecipes: { ...s.selectedRecipes, [categoria]: recetaId } })),
-
-  entrenoLogs: {},
-  setEntrenoLog: (fecha, log) =>
-    set((s) => ({
-      entrenoLogs: {
-        ...s.entrenoLogs,
-        [fecha]: { ...s.entrenoLogs[fecha], ...log },
-      },
-    })),
-
-  menuLogs: {},
-  setMenuLog: (fecha, log) =>
-    set((s) => ({
-      menuLogs: {
-        ...s.menuLogs,
-        [fecha]: { ...s.menuLogs[fecha], ...log },
-      },
-    })),
-
-  addMenuExtra: (fecha, item) =>
-    set((s) => {
-      const existing = s.menuLogs[fecha] ?? {};
-      const extras = [
-        ...(existing.extras ?? []),
-        { ...item, id: Date.now().toString() },
-      ];
-      return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
-    }),
-
-  removeMenuExtra: (fecha, itemId) =>
-    set((s) => {
-      const existing = s.menuLogs[fecha] ?? {};
-      const extras = (existing.extras ?? []).filter((e) => e.id !== itemId);
-      return { menuLogs: { ...s.menuLogs, [fecha]: { ...existing, extras } } };
-    }),
-}));
+  )
+);
